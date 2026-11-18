@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+
+    --color-sa-900: #3b1280;
+    --color-sa-800: #4c1a9e;
+    --color-sa-700: #5b21b6;
+    --color-sa-600: #6d28d9;
+    --color-sa-500: #8b3fe0;
+    --color-sa-200: #e6dcf7;
+    --color-sa-100: #efe8fb;
+    --color-sa-50: #f7f3fe;
+    --color-sa-ink: #2a1a4a;
+    --color-sa-muted: #5f5675;
+}
+
+@layer base {
+    body {
+        font-family: var(--font-sans);
+        background: #e9e5f2;
+    }
+}
+
+@layer components {
+    /* Kanvas halaman: putih keunguan dengan pola titik halus */
+    .sa-screen {
+        background-color: #faf8fe;
+        background-image: radial-gradient(rgba(109, 40, 217, .10) 1px, transparent 1.2px);
+        background-size: 14px 14px;
+    }
+
+    /* Kartu gradasi ungu utama */
+    .sa-card {
+        background: linear-gradient(135deg, #6a22c4 0%, #8a3cd6 55%, #b65be4 100%);
+        box-shadow: 0 14px 28px -12px rgba(106, 34, 196, .55);
+        color: #fff;
+    }
+
+    /* Tombol/ikon bulat-kotak berwarna ungu */
+    .sa-tile {
+        background: linear-gradient(145deg, #6a22c4, #a24ddc);
+        box-shadow: 0 8px 16px -6px rgba(106, 34, 196, .55);
+        color: #fff;
+    }
+
+    /* Tombol lembut (panah kembali, home) */
+    .sa-soft {
+        background: #eee7fb;
+        color: #5b21b6;
+        box-shadow: 0 4px 10px -4px rgba(106, 34, 196, .3);
+    }
+
+    /* Kartu putih dengan bayangan lembut */
+    .sa-white {
+        background: #fff;
+        box-shadow: 0 10px 24px -14px rgba(106, 34, 196, .45), 0 0 0 1px rgba(109, 40, 217, .05);
+    }
+
+    /* Pil kecil putih di atas kartu ungu */
+    .sa-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        border-radius: 9999px;
+        background: #fff;
+        padding: .22rem .6rem;
+        font-size: 9.5px;
+        font-weight: 700;
+        color: #4c1a9e;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .12);
+    }
+}
