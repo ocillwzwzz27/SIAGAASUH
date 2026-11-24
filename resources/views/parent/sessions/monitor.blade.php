@@ -4,189 +4,326 @@
 @section('page-title', 'Live Monitor IoT: ' . $session->child->nama)
 @section('page-subtitle', 'Pemantauan detak jantung, kadar oksigen, dan sensor pengaman secara langsung')
 
+@push('styles')
+<style>
+    @keyframes bpmPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+    @keyframes fadeInDown {
+        from { opacity:0; transform:translateY(-12px); }
+        to { opacity:1; transform:translateY(0); }
+    }
+    .bpm-num { animation: bpmPulse 1.2s ease-in-out infinite; display:inline-block; }
+    .alert-show { animation: fadeInDown 0.4s ease; }
+    .sensor-card { background:#fff; border-radius:20px; box-shadow:0 1px 6px rgba(0,0,0,0.06); border:1px solid #f1f0fb; padding:2rem 1.5rem; text-align:center; position:relative; overflow:hidden; transition:box-shadow 0.3s; }
+    .sensor-card:hover { box-shadow:0 8px 25px rgba(0,0,0,0.1); }
+    .sensor-icon { width:70px; height:70px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:2rem; }
+</style>
+@endpush
+
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">
 
     {{-- Header Status Bar --}}
-    <div class="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <div class="flex items-center gap-3">
-            <span class="w-3.5 h-3.5 bg-green-500 rounded-full animate-ping"></span>
+    <div style="background:#fff;border-radius:16px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 6px rgba(0,0,0,0.06);border:1px solid #f1f0fb;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <div style="position:relative;width:14px;height:14px;">
+                <span style="position:absolute;inset:0;background:#22C55E;border-radius:50%;animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;opacity:0.75;"></span>
+                <span style="position:absolute;inset:0;background:#22C55E;border-radius:50%;"></span>
+            </div>
             <div>
-                <h3 class="font-bold text-gray-800 text-sm">Transmisi Real-Time Aktif</h3>
-                <p class="text-xs text-gray-400">Pengasuh: {{ $session->caregiver->name }} ({{ $session->caregiver->phone }})</p>
+                <h3 style="font-weight:700;color:#111827;font-size:0.95rem;">Transmisi Real-Time Aktif</h3>
+                <p style="font-size:0.72rem;color:#9CA3AF;">
+                    Pengasuh: <strong style="color:#374151;">{{ $session->caregiver->name }}</strong>
+                    &middot; {{ $session->caregiver->phone }}
+                    &middot; Layanan {{ ucfirst($session->jenis_layanan) }}
+                </p>
             </div>
         </div>
-        <a href="{{ route('parent.sessions.show', $session->id) }}" class="btn-outline text-xs py-1.5 px-3">
-            Detail Sesi
+        <a href="{{ route('parent.sessions.show', $session->id) }}"
+           style="display:inline-flex;align-items:center;gap:6px;border:2px solid #7B2FBE;color:#7B2FBE;padding:8px 16px;border-radius:10px;font-weight:600;font-size:0.8rem;text-decoration:none;transition:all 0.2s;">
+            <i class="fas fa-info-circle"></i> Detail Sesi
         </a>
     </div>
 
-    {{-- Kotak Peringatan Bahaya (Muncul otomatis jika melewati ambang batas) --}}
-    <div id="alertBox" class="hidden p-4 rounded-2xl bg-red-100 border-2 border-red-400 text-red-800 animate-bounce">
-        <div class="flex items-center gap-3">
-            <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
-            <div>
-                <h4 class="font-bold text-sm" id="alertTitle">PERINGATAN SENSOR!</h4>
-                <p class="text-xs mt-0.5" id="alertDesc">Data sensor mendeteksi kondisi di luar batas normal.</p>
+    {{-- Alert Box --}}
+    <div id="alertBox" style="display:none;padding:16px 20px;border-radius:16px;background:linear-gradient(135deg,#FEF2F2,#FEE2E2);border:2px solid #FCA5A5;color:#991B1B;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:48px;height:48px;background:#EF4444;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;flex-shrink:0;">
+                <i class="fas fa-exclamation-triangle"></i>
             </div>
+            <div>
+                <h4 style="font-weight:800;font-size:1rem;" id="alertTitle">⚠️ PERINGATAN KONDISI KRITIS!</h4>
+                <p style="font-size:0.8rem;margin-top:3px;color:#B91C1C;" id="alertDesc">Data sensor mendeteksi kondisi di luar batas normal. Segera hubungi pengasuh!</p>
+            </div>
+            <button onclick="document.getElementById('alertBox').style.display='none';"
+                    style="margin-left:auto;width:28px;height:28px;background:rgba(239,68,68,0.15);border:none;border-radius:50%;cursor:pointer;color:#DC2626;font-size:0.85rem;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
     </div>
 
-    {{-- Sensor Cards Grid --}}
+    {{-- Sensor Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        {{-- 1. Heart Rate / BPM --}}
-        <div class="card p-6 text-center border-t-4 border-red-500 relative overflow-hidden">
-            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full mx-auto flex items-center justify-center text-3xl mb-3">
-                <i class="fas fa-heartbeat animate-pulse" id="heartIcon"></i>
+        {{-- BPM --}}
+        <div class="sensor-card" style="border-top:4px solid #EF4444;" id="bpmCard">
+            <div class="sensor-icon" style="background:#FEE2E2;color:#DC2626;">
+                <i class="fas fa-heartbeat" id="heartIcon"></i>
             </div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Detak Jantung (BPM)</p>
-            <div class="text-5xl font-extrabold text-gray-800 my-2" id="bpmValue">
-                {{ $session->latestReading->bpm ?? '--' }}
+            <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9CA3AF;">Detak Jantung</p>
+            <div style="margin:12px 0 4px;">
+                <span class="bpm-num" style="font-size:3.5rem;font-weight:900;color:#111827;line-height:1;" id="bpmValue">
+                    {{ $session->latestReading->bpm ?? '--' }}
+                </span>
+                <span style="font-size:1rem;color:#9CA3AF;font-weight:600;">BPM</span>
             </div>
-            <p class="text-xs font-semibold" id="bpmStatus">
+            <p style="font-size:0.8rem;font-weight:700;margin:4px 0;" id="bpmStatus">
                 @if($session->latestReading)
-                    <span class="{{ $session->latestReading->bpm > 140 || $session->latestReading->bpm < 60 ? 'text-red-600' : 'text-green-600' }}">
+                    <span style="color:{{ ($session->latestReading->bpm > 140 || $session->latestReading->bpm < 60) ? '#DC2626' : '#16A34A' }};">
                         {{ strtoupper($session->latestReading->status_bpm) }}
                     </span>
                 @else
-                    <span class="text-gray-400">Menunggu sinyal...</span>
+                    <span style="color:#9CA3AF;">Menunggu sinyal...</span>
                 @endif
             </p>
-            <span class="text-[10px] text-gray-400 block mt-2">Batas Normal: 60 - 140 BPM</span>
+            <div style="margin-top:12px;background:#F9FAFB;border-radius:8px;padding:6px 10px;font-size:0.68rem;color:#6B7280;">
+                Batas Normal: 60 — 140 BPM
+            </div>
         </div>
 
-        {{-- 2. SpO2 Oxygen --}}
-        <div class="card p-6 text-center border-t-4 border-blue-500">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full mx-auto flex items-center justify-center text-3xl mb-3">
+        {{-- SpO2 --}}
+        <div class="sensor-card" style="border-top:4px solid #3B82F6;">
+            <div class="sensor-icon" style="background:#DBEAFE;color:#2563EB;">
                 <i class="fas fa-lungs"></i>
             </div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Kadar Oksigen (SpO2)</p>
-            <div class="text-5xl font-extrabold text-blue-600 my-2" id="spo2Value">
-                {{ $session->latestReading->spo2 ?? '--' }}<span class="text-2xl font-normal text-gray-400">%</span>
+            <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9CA3AF;">Kadar Oksigen</p>
+            <div style="margin:12px 0 4px;">
+                <span style="font-size:3.5rem;font-weight:900;color:#1D4ED8;line-height:1;" id="spo2Value">
+                    {{ $session->latestReading->spo2 ?? '--' }}
+                </span>
+                <span style="font-size:1.2rem;color:#9CA3AF;font-weight:600;">%</span>
             </div>
-            <p class="text-xs font-semibold text-green-600" id="spo2Status">
+            <p style="font-size:0.8rem;font-weight:700;margin:4px 0;" id="spo2Status">
                 @if($session->latestReading && $session->latestReading->spo2)
-                    {{ $session->latestReading->spo2 >= 95 ? 'OPTIMAL' : 'WASPADA' }}
+                    <span style="color:{{ $session->latestReading->spo2 >= 95 ? '#16A34A' : '#DC2626' }};">
+                        {{ $session->latestReading->spo2 >= 95 ? 'OPTIMAL' : 'WASPADA' }}
+                    </span>
                 @else
-                    <span class="text-gray-400">Menunggu data...</span>
+                    <span style="color:#9CA3AF;">Menunggu data...</span>
                 @endif
             </p>
-            <span class="text-[10px] text-gray-400 block mt-2">Batas Normal: ≥ 95%</span>
+            <div style="margin-top:12px;background:#F9FAFB;border-radius:8px;padding:6px 10px;font-size:0.68rem;color:#6B7280;">
+                Batas Normal: ≥ 95%
+            </div>
         </div>
 
-        {{-- 3. Reed Switch / Security Sensor --}}
-        <div class="card p-6 text-center border-t-4 border-green-500" id="reedCard">
-            <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl mb-3" id="reedIconBg">
-                <i class="fas fa-fingerprint text-green-600" id="reedIcon"></i>
+        {{-- Reed Switch --}}
+        <div class="sensor-card" style="border-top:4px solid #22C55E;" id="reedCard">
+            <div class="sensor-icon" style="background:#DCFCE7;color:#15803D;" id="reedIconBg">
+                <i class="fas fa-fingerprint" id="reedIcon"></i>
             </div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Status Perangkat</p>
-            <div class="text-xl font-extrabold text-gray-800 my-4" id="reedValue">
+            <p style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9CA3AF;">Status Perangkat</p>
+            <div style="margin:12px 0;font-size:1.3rem;font-weight:900;color:#111827;line-height:1.3;" id="reedValue">
                 @if($session->latestReading)
-                    {{ $session->latestReading->reed_status ? 'TERLEPAS DARI ANAK' : 'TERPASANG AMAN' }}
+                    {{ $session->latestReading->reed_status ? '⚠️ TERLEPAS DARI ANAK' : '✅ TERPASANG AMAN' }}
                 @else
-                    TERPASANG AMAN
+                    ✅ TERPASANG AMAN
                 @endif
             </div>
-            <p class="text-xs text-gray-500" id="reedSub">
-                Sensor magnetik wearable
-            </p>
-            <span class="text-[10px] text-gray-400 block mt-2" id="updatedAt">
+            <p style="font-size:0.75rem;color:#6B7280;" id="reedSub">Sensor magnetik wearable</p>
+            <div style="margin-top:12px;background:#F9FAFB;border-radius:8px;padding:6px 10px;font-size:0.68rem;color:#6B7280;" id="updatedAt">
                 Terakhir update: {{ $session->latestReading ? $session->latestReading->recorded_at->diffForHumans() : 'baru saja' }}
-            </span>
+            </div>
         </div>
-
     </div>
 
-    {{-- Simulator IoT Box untuk Pengujian --}}
-    <div class="card bg-purple-50/60 border border-purple-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-microchip text-siaga"></i>
-                <h4 class="font-bold text-sm text-purple-950">🧪 Alat Uji Sensor Wearable (Simulasi Kirim Data IoT)</h4>
+    {{-- Simulator IoT --}}
+    <div style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);border:1.5px solid #DDD6FE;border-radius:20px;padding:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;background:#7B2FBE;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <div>
+                    <h4 style="font-weight:700;font-size:0.9rem;color:#4C1D95;">🧪 Alat Uji Sensor Wearable</h4>
+                    <p style="font-size:0.68rem;color:#7C3AED;">Simulasi kirim data IoT dari mikrokontroler</p>
+                </div>
             </div>
-            <span class="text-xs text-purple-700 font-mono">POST /api/v1/sensor</span>
+            <span style="font-size:0.68rem;color:#7C3AED;font-family:monospace;background:#EDE9FE;padding:4px 8px;border-radius:6px;">POST /api/v1/sensor</span>
         </div>
-        <p class="text-xs text-purple-800 mb-4">
-            Kamu bisa klik tombol di bawah untuk menyimulasikan data sensor yang dikirim oleh mikrokontroler wearable anak ke server:
-        </p>
 
-        @php
-            $dev = $session->child->activeDevice;
-        @endphp
-
+        @php $dev = $session->child->activeDevice; @endphp
         @if($dev)
-            <div class="flex flex-wrap gap-2.5">
-                <button type="button" onclick="sendSimulatedData({{ $dev->id }}, '{{ $dev->device_code }}', '{{ $dev->device_token }}', 85, 98, false)" class="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-2 px-3.5 rounded-xl shadow-sm transition">
-                    ❤️ Kirim Normal (85 BPM, 98% SpO2)
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;">
+                <button type="button"
+                    onclick="sendSimulatedData({{ $dev->id }}, '{{ $dev->device_code }}', '{{ $dev->device_token }}', 85, 98, false)"
+                    style="background:#16A34A;color:#fff;font-size:0.78rem;font-weight:700;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;">
+                    <i class="fas fa-heart"></i> Normal (85 BPM, 98% SpO2)
                 </button>
-                <button type="button" onclick="sendSimulatedData({{ $dev->id }}, '{{ $dev->device_code }}', '{{ $dev->device_token }}', 152, 97, false)" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-2 px-3.5 rounded-xl shadow-sm transition">
-                    🚨 Kirim BPM Tinggi (152 BPM)
+                <button type="button"
+                    onclick="sendSimulatedData({{ $dev->id }}, '{{ $dev->device_code }}', '{{ $dev->device_token }}', 152, 97, false)"
+                    style="background:#DC2626;color:#fff;font-size:0.78rem;font-weight:700;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;">
+                    <i class="fas fa-exclamation-triangle"></i> BPM Tinggi (152 BPM)
                 </button>
-                <button type="button" onclick="sendSimulatedData({{ $dev->id }}, '{{ $dev->device_code }}', '{{ $dev->device_token }}', 80, 91, false)" class="bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-semibold py-2 px-3.5 rounded-xl shadow-sm transition">
-                    ⚠️ Kirim SpO2 Rendah (91%)
+                <button type="button"
+                    onclick="sendSimulatedData({{ $dev->id }}, '{{ $dev->device_code }}', '{{ $dev->device_token }}', 80, 91, false)"
+                    style="background:#D97706;color:#fff;font-size:0.78rem;font-weight:700;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;">
+                    <i class="fas fa-lungs"></i> SpO2 Rendah (91%)
                 </button>
-                <button type="button" onclick="sendSimulatedData({{ $dev->id }}, '{{ $dev->device_code }}', '{{ $dev->device_token }}', 90, 98, true)" class="bg-purple-700 hover:bg-purple-800 text-white text-xs font-semibold py-2 px-3.5 rounded-xl shadow-sm transition">
-                    🧲 Kirim Status Wearable Dilepas
+                <button type="button"
+                    onclick="sendSimulatedData({{ $dev->id }}, '{{ $dev->device_code }}', '{{ $dev->device_token }}', 90, 98, true)"
+                    style="background:#7C3AED;color:#fff;font-size:0.78rem;font-weight:700;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;">
+                    <i class="fas fa-magnet"></i> Wearable Dilepas
                 </button>
             </div>
+            <p style="font-size:0.68rem;color:#6D28D9;margin-top:10px;">
+                <i class="fas fa-info-circle"></i>
+                Token device: <code style="background:#EDE9FE;padding:1px 6px;border-radius:4px;">{{ substr($dev->device_token, 0, 20) }}...</code>
+            </p>
         @else
-            <p class="text-xs text-red-600 font-semibold">Anak ini belum memiliki perangkat wearable yang terdaftar.</p>
+            <div style="text-align:center;padding:1rem;color:#DC2626;font-size:0.85rem;font-weight:600;">
+                <i class="fas fa-exclamation-circle"></i>
+                Anak ini belum memiliki perangkat wearable yang terdaftar.
+            </div>
         @endif
     </div>
+
+    {{-- Riwayat Pembacaan Sensor --}}
+    @php $readings = $session->sensorReadings()->latest()->take(5)->get(); @endphp
+    @if($readings->count() > 0)
+        <div class="card">
+            <h4 style="font-weight:700;color:#111827;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-history" style="color:#7B2FBE;"></i> Log Sensor Terbaru
+            </h4>
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                    <thead>
+                        <tr style="background:#F9FAFB;">
+                            <th style="padding:8px 12px;text-align:left;font-weight:700;color:#374151;font-size:0.7rem;text-transform:uppercase;">Waktu</th>
+                            <th style="padding:8px 12px;text-align:center;font-weight:700;color:#374151;font-size:0.7rem;text-transform:uppercase;">BPM</th>
+                            <th style="padding:8px 12px;text-align:center;font-weight:700;color:#374151;font-size:0.7rem;text-transform:uppercase;">SpO2</th>
+                            <th style="padding:8px 12px;text-align:center;font-weight:700;color:#374151;font-size:0.7rem;text-transform:uppercase;">Reed</th>
+                            <th style="padding:8px 12px;text-align:center;font-weight:700;color:#374151;font-size:0.7rem;text-transform:uppercase;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($readings as $r)
+                            <tr style="border-top:1px solid #F3F4F6;{{ $r->isCritical() ? 'background:#FFF1F2;' : '' }}">
+                                <td style="padding:9px 12px;color:#6B7280;">{{ $r->recorded_at->format('H:i:s') }}</td>
+                                <td style="padding:9px 12px;text-align:center;font-weight:700;color:{{ ($r->bpm < 60 || $r->bpm > 140) ? '#DC2626' : '#15803D' }};">{{ $r->bpm }}</td>
+                                <td style="padding:9px 12px;text-align:center;font-weight:700;color:{{ ($r->spo2 && $r->spo2 < 95) ? '#DC2626' : '#15803D' }};">{{ $r->spo2 ?? '-' }}%</td>
+                                <td style="padding:9px 12px;text-align:center;">
+                                    @if($r->reed_status)
+                                        <span style="color:#DC2626;font-size:0.75rem;font-weight:700;">⚠️ Lepas</span>
+                                    @else
+                                        <span style="color:#15803D;font-size:0.75rem;font-weight:700;">✅ Pasang</span>
+                                    @endif
+                                </td>
+                                <td style="padding:9px 12px;text-align:center;">
+                                    @if($r->isCritical())
+                                        <span style="background:#FEE2E2;color:#991B1B;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:999px;">KRITIS</span>
+                                    @else
+                                        <span style="background:#DCFCE7;color:#15803D;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:999px;">NORMAL</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 
 </div>
 
 @push('scripts')
 <script>
-    // Auto-polling sensor setiap 3 detik
+    // --- CSS untuk ping animation ---
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ping { 75%,100% { transform:scale(2); opacity:0; } }
+    `;
+    document.head.appendChild(style);
+
     const sessionId = {{ $session->id }};
     const sensorUrl = "{{ route('parent.sessions.sensor', $session->id) }}";
+    let lastBpm = null;
 
     function fetchSensorData() {
         fetch(sensorUrl)
             .then(res => res.json())
             .then(data => {
-                if (data.bpm) {
-                    document.getElementById('bpmValue').innerText = data.bpm;
-                    const bpmStatus = document.getElementById('bpmStatus');
-                    bpmStatus.innerText = data.status_bpm.toUpperCase();
-                    bpmStatus.className = 'text-xs font-semibold ' + (data.bpm > 140 || data.bpm < 60 ? 'text-red-600' : 'text-green-600');
+                if (data.bpm !== undefined && data.bpm !== null) {
+                    const bpmEl = document.getElementById('bpmValue');
+                    bpmEl.textContent = data.bpm;
+
+                    // Animate BPM change
+                    if (lastBpm !== data.bpm) {
+                        bpmEl.style.transform = 'scale(1.2)';
+                        setTimeout(() => { bpmEl.style.transform = 'scale(1)'; bpmEl.style.transition = 'transform 0.3s'; }, 200);
+                        lastBpm = data.bpm;
+                    }
+
+                    const isBpmCritical = data.bpm > 140 || data.bpm < 60;
+                    const statusEl = document.getElementById('bpmStatus');
+                    statusEl.innerHTML = `<span style="color:${isBpmCritical ? '#DC2626' : '#16A34A'};font-weight:700;">${(data.status_bpm || (isBpmCritical ? 'KRITIS' : 'NORMAL')).toUpperCase()}</span>`;
                 }
-                if (data.spo2) {
-                    document.getElementById('spo2Value').innerHTML = data.spo2 + '<span class="text-2xl font-normal text-gray-400">%</span>';
+
+                if (data.spo2 !== undefined && data.spo2 !== null) {
+                    document.getElementById('spo2Value').textContent = data.spo2;
+                    const isSpo2Ok = data.spo2 >= 95;
+                    document.getElementById('spo2Status').innerHTML = `<span style="color:${isSpo2Ok ? '#16A34A' : '#DC2626'};font-weight:700;">${isSpo2Ok ? 'OPTIMAL' : 'WASPADA'}</span>`;
                 }
+
                 if (data.reed_status !== undefined) {
                     const reedVal = document.getElementById('reedValue');
                     const reedCard = document.getElementById('reedCard');
                     if (data.reed_status) {
-                        reedVal.innerText = 'TERLEPAS DARI ANAK';
-                        reedVal.className = 'text-xl font-extrabold text-red-600 my-4';
-                        reedCard.className = 'card p-6 text-center border-t-4 border-red-500 bg-red-50/50';
+                        reedVal.innerHTML = '⚠️ TERLEPAS DARI ANAK';
+                        reedVal.style.color = '#DC2626';
+                        reedCard.style.borderTopColor = '#EF4444';
+                        reedCard.style.background = '#FFF1F2';
                     } else {
-                        reedVal.innerText = 'TERPASANG AMAN';
-                        reedVal.className = 'text-xl font-extrabold text-gray-800 my-4';
-                        reedCard.className = 'card p-6 text-center border-t-4 border-green-500';
+                        reedVal.innerHTML = '✅ TERPASANG AMAN';
+                        reedVal.style.color = '#111827';
+                        reedCard.style.borderTopColor = '#22C55E';
+                        reedCard.style.background = '#fff';
                     }
                 }
+
                 if (data.recorded_at) {
-                    document.getElementById('updatedAt').innerText = 'Terakhir update: ' + data.recorded_at;
+                    document.getElementById('updatedAt').textContent = 'Terakhir update: ' + data.recorded_at;
                 }
 
-                // Cek alert
+                // Alert logic
+                const bpmCritical = data.bpm && (data.bpm > 140 || data.bpm < 60);
+                const spo2Critical = data.spo2 && data.spo2 < 95;
+                const reedCritical = data.reed_status;
                 const alertBox = document.getElementById('alertBox');
-                if ((data.bpm && (data.bpm > 140 || data.bpm < 60)) || (data.spo2 && data.spo2 < 95) || data.reed_status) {
-                    alertBox.classList.remove('hidden');
+
+                if (bpmCritical || spo2Critical || reedCritical) {
+                    let msgs = [];
+                    if (bpmCritical) msgs.push(`BPM ${data.bpm} (${data.bpm > 140 ? 'TERLALU TINGGI' : 'TERLALU RENDAH'})`);
+                    if (spo2Critical) msgs.push(`SpO2 ${data.spo2}% (DI BAWAH NORMAL)`);
+                    if (reedCritical) msgs.push('Perangkat TERLEPAS dari anak!');
+                    document.getElementById('alertDesc').textContent = msgs.join(' | ') + ' — Segera hubungi pengasuh!';
+                    alertBox.style.display = 'block';
+                    alertBox.classList.add('alert-show');
+                    // Auto scroll ke alert
+                    alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
-                    alertBox.classList.add('hidden');
+                    alertBox.style.display = 'none';
                 }
             })
-            .catch(err => console.log('Polling err:', err));
+            .catch(err => console.log('Polling error:', err));
     }
 
     setInterval(fetchSensorData, 3000);
+    // Fetch sekali langsung saat halaman dimuat
+    setTimeout(fetchSensorData, 500);
 
-    // Fungsi kirim data simulasi IoT via API
     function sendSimulatedData(devId, devCode, devToken, bpm, spo2, reed) {
         fetch('/api/v1/sensor', {
             method: 'POST',

@@ -65,6 +65,11 @@ Route::middleware(['auth', 'role:orang_tua'])->prefix('parent')->name('parent.')
     Route::post('/sessions/{id}/cancel', [ParentCtrl\SessionController::class, 'cancel'])->name('sessions.cancel');
     Route::get('/sessions/{id}/monitor', [ParentCtrl\SessionController::class, 'monitor'])->name('sessions.monitor');
     Route::get('/sessions/{id}/sensor', [ParentCtrl\SessionController::class, 'latestSensor'])->name('sessions.sensor');
+
+    // Notifications
+    Route::get('/notifications', [ParentCtrl\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [ParentCtrl\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [ParentCtrl\NotificationController::class, 'markAllRead'])->name('notifications.readAll');
 });
 
 // ===================== PENGASUH ROUTES =====================

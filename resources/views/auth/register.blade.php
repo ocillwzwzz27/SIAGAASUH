@@ -1,94 +1,97 @@
 @extends('layouts.auth')
-
 @section('title', 'Daftar Akun Baru')
 
 @section('content')
-<div class="w-full max-w-md my-6">
-    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {{-- Header --}}
-        <div class="gradient-purple px-8 pt-8 pb-10 text-center relative">
-            <h1 class="text-2xl font-bold text-white tracking-wide">Daftar Akun</h1>
-            <p class="text-purple-100 text-sm mt-1">Bergabung bersama keluarga SiagaAsuh</p>
-
-            <div class="absolute bottom-0 left-0 right-0">
-                <svg viewBox="0 0 500 40" preserveAspectRatio="none" class="w-full h-8 text-white fill-current">
-                    <path d="M0,20 C150,45 350,-5 500,20 L500,40 L0,40 Z"></path>
-                </svg>
-            </div>
+<div class="auth-card" style="max-width:440px;width:100%;margin:20px 0;">
+    <div class="auth-card-header">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;background:white;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,0.15);margin-bottom:12px;">
+            <img src="/images/logo-icon.svg" alt="Logo" style="width:38px;height:38px;">
         </div>
-
-        <div class="p-8 pt-2">
-            @if(isset($errors) && $errors->any())
-                <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-xl text-sm">
-                    {{ $errors->first() }}
-                </div>
-            @endif
-
-            <form action="{{ route('register.post') }}" method="POST" class="space-y-3.5">
-                @csrf
-
-                {{-- Pilihan Peran --}}
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Saya mendaftar sebagai:</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="relative flex flex-col items-center p-3 border-2 border-purple-200 rounded-2xl cursor-pointer hover:border-purple-500 transition has-[:checked]:border-purple-600 has-[:checked]:bg-purple-50">
-                            <input type="radio" name="role" value="orang_tua" class="sr-only" checked>
-                            <i class="fas fa-home text-purple-600 text-xl mb-1"></i>
-                            <span class="text-xs font-bold text-gray-800">Orang Tua</span>
-                            <span class="text-[10px] text-gray-500">Cari Pengasuh</span>
-                        </label>
-                        <label class="relative flex flex-col items-center p-3 border-2 border-purple-200 rounded-2xl cursor-pointer hover:border-purple-500 transition has-[:checked]:border-purple-600 has-[:checked]:bg-purple-50">
-                            <input type="radio" name="role" value="pengasuh" class="sr-only" {{ old('role') === 'pengasuh' ? 'checked' : '' }}>
-                            <i class="fas fa-user-nurse text-purple-600 text-xl mb-1"></i>
-                            <span class="text-xs font-bold text-gray-800">Mitra Pengasuh</span>
-                            <span class="text-[10px] text-gray-500">Beri Layanan</span>
-                        </label>
-                    </div>
-                </div>
-
-                {{-- Nama Lengkap --}}
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nama Lengkap</label>
-                    <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Siti Rahma" class="input text-sm">
-                </div>
-
-                {{-- Email --}}
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Alamat Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="nama@email.com" class="input text-sm">
-                </div>
-
-                {{-- No HP --}}
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nomor Handphone / WhatsApp</label>
-                    <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="08123456789" class="input text-sm">
-                </div>
-
-                {{-- Password --}}
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Kata Sandi</label>
-                    <input type="password" name="password" required placeholder="Minimal 8 karakter" class="input text-sm">
-                </div>
-
-                {{-- Konfirmasi Password --}}
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Ulangi Kata Sandi</label>
-                    <input type="password" name="password_confirmation" required placeholder="Ulangi kata sandi" class="input text-sm">
-                </div>
-
-                {{-- Tombol Daftar --}}
-                <div class="pt-3">
-                    <button type="submit" class="w-full btn-primary text-white py-3 rounded-2xl font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition duration-200">
-                        Daftar Sekarang
-                    </button>
-                </div>
-            </form>
-
-            <div class="text-center mt-5 text-xs text-gray-500">
-                Sudah memiliki akun?
-                <a href="{{ route('login') }}" class="text-purple-600 font-bold hover:underline">Masuk disini</a>
-            </div>
+        <div style="color:white;font-size:1.2rem;font-weight:800;">Siaga<span style="color:#F59E0B;">Asuh</span></div>
+        <div style="margin-top:16px;">
+            <h2 style="color:white;font-size:1.2rem;font-weight:700;">Buat Akun Baru ✨</h2>
+            <p style="color:rgba(233,213,255,0.8);font-size:0.78rem;margin-top:3px;">Bergabunglah bersama keluarga SiagaAsuh</p>
         </div>
     </div>
+
+    <div class="auth-card-body">
+        @if(isset($errors) && $errors->any())
+            <div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 14px;border-radius:12px;font-size:0.8rem;margin-bottom:16px;">
+                <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
+            </div>
+        @endif
+
+        <form action="{{ route('register.post') }}" method="POST" style="display:flex;flex-direction:column;gap:13px;">
+            @csrf
+
+            {{-- Pilihan Peran --}}
+            <div>
+                <label class="label-sm">Saya mendaftar sebagai</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+                    <label style="border:2px solid #e5e7eb;border-radius:14px;padding:12px;cursor:pointer;text-align:center;transition:all 0.2s;" id="label-ortu">
+                        <input type="radio" name="role" value="orang_tua" style="display:none;" checked onchange="updateRole()">
+                        <div style="font-size:1.3rem;margin-bottom:4px;">👨‍👩‍👧</div>
+                        <div style="font-size:0.78rem;font-weight:700;color:#374151;">Orang Tua</div>
+                        <div style="font-size:0.65rem;color:#9ca3af;margin-top:1px;">Cari Pengasuh</div>
+                    </label>
+                    <label style="border:2px solid #e5e7eb;border-radius:14px;padding:12px;cursor:pointer;text-align:center;transition:all 0.2s;" id="label-pgsh">
+                        <input type="radio" name="role" value="pengasuh" style="display:none;" onchange="updateRole()">
+                        <div style="font-size:1.3rem;margin-bottom:4px;">👩‍⚕️</div>
+                        <div style="font-size:0.78rem;font-weight:700;color:#374151;">Mitra Pengasuh</div>
+                        <div style="font-size:0.65rem;color:#9ca3af;margin-top:1px;">Beri Layanan</div>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="label-sm">Nama Lengkap</label>
+                <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Siti Rahmawati">
+            </div>
+            <div>
+                <label class="label-sm">Email</label>
+                <input type="email" name="email" value="{{ old('email') }}" required placeholder="nama@email.com">
+            </div>
+            <div>
+                <label class="label-sm">Nomor WhatsApp</label>
+                <div class="input-wrap">
+                    <span class="input-icon"><i class="fab fa-whatsapp" style="color:#25d366;"></i></span>
+                    <input type="tel" name="phone" value="{{ old('phone') }}" required placeholder="08123456789">
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div>
+                    <label class="label-sm">Kata Sandi</label>
+                    <input type="password" name="password" required placeholder="Min. 8 karakter">
+                </div>
+                <div>
+                    <label class="label-sm">Ulangi Kata Sandi</label>
+                    <input type="password" name="password_confirmation" required placeholder="Ulangi">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-purple" style="margin-top:4px;">
+                <i class="fas fa-user-plus" style="margin-right:8px;"></i> Daftar Sekarang
+            </button>
+        </form>
+
+        <p style="text-align:center;margin-top:16px;font-size:0.8rem;color:#9ca3af;">
+            Sudah punya akun?
+            <a href="{{ route('login') }}" style="color:#7B2FBE;font-weight:700;text-decoration:none;">Masuk disini</a>
+        </p>
+    </div>
 </div>
+
+<script>
+function updateRole() {
+    const ortu = document.querySelector('[value="orang_tua"]').checked;
+    document.getElementById('label-ortu').style.borderColor = ortu ? '#7B2FBE' : '#e5e7eb';
+    document.getElementById('label-ortu').style.background = ortu ? '#faf5ff' : 'white';
+    document.getElementById('label-pgsh').style.borderColor = !ortu ? '#7B2FBE' : '#e5e7eb';
+    document.getElementById('label-pgsh').style.background = !ortu ? '#faf5ff' : 'white';
+}
+// Set default style
+document.getElementById('label-ortu').style.borderColor = '#7B2FBE';
+document.getElementById('label-ortu').style.background = '#faf5ff';
+document.querySelectorAll('[name="role"]').forEach(r => r.addEventListener('change', updateRole));
+</script>
 @endsection

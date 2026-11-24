@@ -55,14 +55,19 @@
 <div class="flex h-screen overflow-hidden">
     <aside id="sidebar" class="gradient-purple w-64 flex-shrink-0 flex flex-col shadow-xl transition-all duration-300 z-30">
         {{-- Logo --}}
-        <div class="p-6 border-b border-white/20">
+        <div class="p-5 border-b border-white/20">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-                    <span class="text-siaga text-xl">👶</span>
+                <div style="width:40px;height:40px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;padding:4px;">
+                    <img src="{{ asset('images/logo-full.png') }}" alt="SiagaAsuh"
+                         style="width:100%;height:100%;object-fit:contain;">
                 </div>
                 <div>
-                    <h1 class="text-white font-bold text-lg leading-tight">SiagaAsuh</h1>
-                    <p class="text-purple-200 text-xs">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</p>
+                    <h1 style="color:#fff;font-weight:800;font-size:1.05rem;line-height:1.2;letter-spacing:-0.3px;">
+                        Siaga<span style="color:#F59E0B;">Asuh</span>
+                    </h1>
+                    <p style="color:rgba(233,213,255,0.75);font-size:0.68rem;text-transform:capitalize;">
+                        {{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -104,12 +109,13 @@
                 {{-- Notifikasi --}}
                 <div class="relative">
                     @php $unread = \App\Models\AppNotification::where('user_id', auth()->id())->where('sudah_dibaca', false)->count(); @endphp
-                    <button class="relative p-2.5 text-gray-500 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition" title="Notifikasi">
-                        <i class="fas fa-bell"></i>
+                    @php $notifRoute = auth()->user()->role === 'orang_tua' ? route('parent.notifications.index') : '#'; @endphp
+                    <a href="{{ $notifRoute }}" style="position:relative;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:12px;color:#6B7280;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='#F5F3FF';this.style.color='#7B2FBE';" onmouseout="this.style.background='transparent';this.style.color='#6B7280';" title="Notifikasi">
+                        <i class="fas fa-bell" style="font-size:1rem;"></i>
                         @if($unread > 0)
-                            <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold leading-none" style="width:18px;height:18px;font-size:9px;">{{ $unread > 9 ? '9+' : $unread }}</span>
+                            <span style="position:absolute;top:-2px;right:-2px;background:#EF4444;color:#fff;font-size:9px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1;border:2px solid #fff;">{{ $unread > 9 ? '9+' : $unread }}</span>
                         @endif
-                    </button>
+                    </a>
                 </div>
                 {{-- User Chip --}}
                 <div class="flex items-center gap-2 bg-purple-50 px-3 py-1.5 rounded-xl">
