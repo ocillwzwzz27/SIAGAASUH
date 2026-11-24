@@ -16,9 +16,7 @@
             <span>Verifikasi Pengasuh</span>
             @php $pendingCount = \App\Models\CaregiverProfile::where('status_verifikasi','menunggu')->count(); @endphp
             @if($pendingCount > 0)
-                <span style="background:#FBBF24;color:#78350F;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;">
-                    {{ $pendingCount }}
-                </span>
+                <span class="sidebar-count">{{ $pendingCount }}</span>
             @endif
         </div>
     </a>
@@ -37,10 +35,6 @@
         <span>Kelola Pengguna</span>
     </a>
 
-    {{-- Divider --}}
-    <div style="border-top:1px solid rgba(255,255,255,0.15);margin:10px 0;"></div>
-
-    <div style="padding:4px 16px;font-size:0.65rem;font-weight:700;color:rgba(233,213,255,0.5);letter-spacing:0.08em;text-transform:uppercase;">
-        ADMIN PANEL
-    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-label">ADMIN PANEL</div>
 @endsection

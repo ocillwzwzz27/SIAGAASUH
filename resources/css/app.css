@@ -1,11 +1,26 @@
+/*
+ * Entry CSS untuk area dashboard (admin / orang tua / pengasuh).
+ * Isi file ini hanya daftar import — style ditulis di folder masing-masing.
+ */
 @import 'tailwindcss';
+
+@import './base/tokens.css';
+@import './base/theme.css';
+@import './base/base.css';
+
+@import './components/card.css';
+@import './components/button.css';
+@import './components/badge.css';
+@import './components/form.css';
+@import './components/sidebar.css';
+@import './components/topbar.css';
+@import './components/empty-state.css';
+
+@import './pages/admin-dashboard.css';
+@import './pages/notifications.css';
+@import './pages/monitor.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
-
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-}

@@ -1,68 +1,65 @@
 @extends('layouts.auth')
 @section('title', 'Masuk')
 
+@push('scripts')
+    @vite('resources/js/pages/auth/login.js')
+@endpush
+
 @section('content')
-<div class="auth-card">
+<div class="auth-card auth-login">
+    {{-- Background desain (satu SVG utuh) --}}
+    <img class="auth-login__bg" src="{{ asset('images/auth/login-page.svg') }}" alt="" aria-hidden="true">
+
     {{-- Header --}}
     <div class="auth-card-header">
-        <div style="display:inline-flex;align-items:center;justify-content:center;width:68px;height:68px;background:white;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,0.18);margin-bottom:14px;">
-            <img src="/images/logo-icon.svg" alt="Logo" style="width:44px;height:44px;">
+        <div class="auth-logo">
+            <img src="{{ asset('images/auth/login-logo.svg') }}" alt="Logo SiagaAsuh">
         </div>
-        <div style="color:white;font-size:1.3rem;font-weight:800;letter-spacing:-0.3px;">
-            Siaga<span style="color:#F59E0B;">Asuh</span>
-        </div>
-        <p style="color:rgba(233,213,255,0.85);font-size:0.78rem;margin-top:4px;">Pengasuh Terpercaya Kapan Saja</p>
-        <div style="margin-top:18px;">
-            <h2 style="color:white;font-size:1.25rem;font-weight:700;">Selamat Datang 👋</h2>
-            <p style="color:rgba(233,213,255,0.8);font-size:0.8rem;margin-top:3px;">Masuk untuk melanjutkan ke akun Anda</p>
+        <div class="auth-heading">
+            <h2 class="auth-heading__title">Selamat Datang</h2>
+            <p class="auth-heading__subtitle">Masuk untuk lanjut</p>
         </div>
     </div>
 
     {{-- Body --}}
     <div class="auth-card-body">
         @if(session('error'))
-            <div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 14px;border-radius:12px;font-size:0.8rem;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+            <div class="auth-alert">
                 <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
             </div>
         @endif
         @if(isset($errors) && $errors->any())
-            <div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:10px 14px;border-radius:12px;font-size:0.8rem;margin-bottom:16px;">
+            <div class="auth-alert">
                 <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
             </div>
         @endif
 
-        <form action="{{ route('login.post') }}" method="POST" style="display:flex;flex-direction:column;gap:14px;">
+        <form action="{{ route('login.post') }}" method="POST" class="auth-form">
             @csrf
-            <div>
-                <label class="label-sm">Email</label>
+            <div class="login-field">
                 <div class="input-wrap">
-                    <span class="input-icon"><i class="fas fa-envelope"></i></span>
-                    <input type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="nama@email.com">
+                    <span class="input-icon"><i class="fas fa-user"></i></span>
+                    <input type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Email atau No. Handphone">
                 </div>
             </div>
-            <div>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                    <label class="label-sm" style="margin:0;">Kata Sandi</label>
-                    <a href="#" style="font-size:0.72rem;color:#7B2FBE;font-weight:600;text-decoration:none;">Lupa kata sandi?</a>
-                </div>
+            <div class="login-field login-field--password">
                 <div class="input-wrap">
-                    <span class="input-icon"><i class="fas fa-lock"></i></span>
-                    <input type="password" id="pwd" name="password" required placeholder="••••••••"
-                        style="padding-left:42px;padding-right:44px;">
-                    <button type="button" onclick="togglePwd()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;padding:0;font-size:0.85rem;">
+                    <span class="input-icon"><i class="fas fa-key"></i></span>
+                    <input type="password" id="pwd" name="password" required placeholder="••••••••">
+                    <button type="button" id="togglePassword" class="input-toggle" aria-label="Tampilkan kata sandi">
                         <i class="fas fa-eye" id="eyeIcon"></i>
                     </button>
                 </div>
             </div>
 
-            <div style="display:flex;align-items:center;gap:8px;">
-                <input type="checkbox" name="remember" id="rem" style="width:15px;height:15px;accent-color:#7B2FBE;cursor:pointer;flex-shrink:0;">
-                <label for="rem" style="font-size:0.8rem;color:#6b7280;cursor:pointer;">Ingat saya di perangkat ini</label>
+            <div class="login-forgot"><a href="#">Lupa Kata Sandi?</a></div>
+
+            <div hidden>
+                <input type="checkbox" name="remember" id="rem" class="auth-remember-box">
+                <label for="rem" class="auth-remember-label">Ingat saya di perangkat ini</label>
             </div>
 
-            <button type="submit" class="btn-purple" style="margin-top:4px;">
-                <i class="fas fa-sign-in-alt" style="margin-right:8px;"></i> Masuk ke SiagaAsuh
-            </button>
+            <button type="submit" class="btn-purple login-submit">Masuk</button>
         </form>
 
         <div class="divider">
@@ -71,38 +68,31 @@
             <div class="divider-line"></div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
-            <button class="social-btn"><i class="fab fa-google" style="color:#ea4335;"></i></button>
-            <button class="social-btn"><i class="fab fa-apple" style="color:#1d1d1f;"></i></button>
-            <button class="social-btn"><i class="fab fa-facebook-f" style="color:#1877f2;"></i></button>
+        <div class="social-grid">
+            <button type="button" class="social-btn" aria-label="Lanjut dengan Google">
+                <img src="{{ asset('images/auth/social/google.svg') }}" alt="" class="social-btn__img">
+            </button>
+            <button type="button" class="social-btn" aria-label="Lanjut dengan Apple">
+                <img src="{{ asset('images/auth/social/apple.svg') }}" alt="" class="social-btn__img">
+            </button>
+            <button type="button" class="social-btn" aria-label="Lanjut dengan Facebook">
+                <img src="{{ asset('images/auth/social/facebook.svg') }}" alt="" class="social-btn__img">
+            </button>
         </div>
 
-        <p style="text-align:center;margin-top:18px;font-size:0.8rem;color:#9ca3af;">
+        <p class="auth-footer">
             Belum punya akun?
-            <a href="{{ route('register') }}" style="color:#7B2FBE;font-weight:700;text-decoration:none;">Daftar disini</a>
+            <a href="{{ route('register') }}">Daftar disini</a>
         </p>
 
         <div class="demo-box">
-            <p style="font-size:0.65rem;font-weight:700;color:#581c87;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">💡 Demo Login Cepat</p>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                <button class="demo-btn" onclick="fill('admin@siagaasuh.com','admin123')">🛡️ Admin</button>
-                <button class="demo-btn" onclick="fill('orangtua@siagaasuh.com','password')">👨‍👩‍👧 Orang Tua</button>
-                <button class="demo-btn" onclick="fill('trisna@siagaasuh.com','password')">👩‍⚕️ Pengasuh</button>
+            <p class="demo-box__title">💡 Demo Login Cepat</p>
+            <div class="demo-box__actions">
+                <button type="button" class="demo-btn" data-demo-email="admin@siagaasuh.com" data-demo-password="admin123">🛡️ Admin</button>
+                <button type="button" class="demo-btn" data-demo-email="orangtua@siagaasuh.com" data-demo-password="password">👨‍👩‍👧 Orang Tua</button>
+                <button type="button" class="demo-btn" data-demo-email="trisna@siagaasuh.com" data-demo-password="password">👩‍⚕️ Pengasuh</button>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    function togglePwd() {
-        const i = document.getElementById('pwd');
-        const ic = document.getElementById('eyeIcon');
-        i.type = i.type === 'password' ? 'text' : 'password';
-        ic.className = i.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-    }
-    function fill(email, pass) {
-        document.querySelector('[name="email"]').value = email;
-        document.getElementById('pwd').value = pass;
-    }
-</script>
 @endsection

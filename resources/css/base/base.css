@@ -1,0 +1,26 @@
+@layer base {
+    /* Kompatibilitas Tailwind v4: default border & cursor tombol seperti v3 */
+    *, ::after, ::before, ::backdrop, ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+    button:not(:disabled), [role='button']:not(:disabled) {
+        cursor: pointer;
+    }
+
+    body { font-family: var(--font-base); }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f9f5ff; }
+    ::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 999px; }
+
+    nav[aria-label='Pagination'] { display: flex; justify-content: center; margin-top: 16px; }
+}
+
+@layer components {
+    .app-main { animation: fade-in-up 0.25s ease; }
+
+    @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+}

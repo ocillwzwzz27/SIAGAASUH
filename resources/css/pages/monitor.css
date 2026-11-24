@@ -1,0 +1,129 @@
+@layer components {
+    /* ---- Status bar ---- */
+    .monitor-status {
+        display: flex; align-items: center; justify-content: space-between;
+        background: #fff; border-radius: 16px; padding: 16px 20px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06); border: 1px solid #f1f0fb;
+    }
+    .monitor-status__info { display: flex; align-items: center; gap: 14px; }
+    .monitor-status__title { font-weight: 700; color: #111827; font-size: 0.95rem; }
+    .monitor-status__meta { font-size: 0.72rem; color: #9CA3AF; }
+    .monitor-status__meta strong { color: #374151; }
+
+    .live-dot { position: relative; width: 14px; height: 14px; }
+    .live-dot__ping, .live-dot__core { position: absolute; inset: 0; background: #22C55E; border-radius: 50%; }
+    .live-dot__ping { opacity: 0.75; animation: monitor-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+    /* ---- Kotak peringatan ---- */
+    .alert-critical {
+        display: none; padding: 16px 20px; border-radius: 16px;
+        background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+        border: 2px solid #FCA5A5; color: #991B1B;
+    }
+    .alert-critical.is-visible { display: block; animation: fade-in-down 0.4s ease; }
+    .alert-critical__inner { display: flex; align-items: center; gap: 14px; }
+    .alert-critical__icon {
+        width: 48px; height: 48px; flex-shrink: 0; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        background: #EF4444; color: #fff; font-size: 1.3rem;
+    }
+    .alert-critical__title { font-weight: 800; font-size: 1rem; }
+    .alert-critical__desc { font-size: 0.8rem; margin-top: 3px; color: #B91C1C; }
+    .alert-critical__close {
+        margin-left: auto; width: 28px; height: 28px; border: none; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(239, 68, 68, 0.15); color: #DC2626; font-size: 0.85rem;
+    }
+
+    /* ---- Kartu sensor ---- */
+    .sensor-card {
+        position: relative; overflow: hidden; text-align: center;
+        background: #fff; border-radius: 20px; padding: 2rem 1.5rem;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06); border: 1px solid #f1f0fb;
+        transition: box-shadow 0.3s;
+    }
+    .sensor-card:hover { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); }
+    .sensor-card--heart  { border-top: 4px solid #EF4444; }
+    .sensor-card--spo2   { border-top: 4px solid #3B82F6; }
+    .sensor-card--device { border-top: 4px solid #22C55E; }
+    .sensor-card.is-alert { border-top-color: #EF4444; background: #FFF1F2; }
+
+    .sensor-icon {
+        width: 70px; height: 70px; margin: 0 auto 14px; border-radius: 50%; font-size: 2rem;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .sensor-icon--heart  { background: #FEE2E2; color: #DC2626; }
+    .sensor-icon--spo2   { background: #DBEAFE; color: #2563EB; }
+    .sensor-icon--device { background: #DCFCE7; color: #15803D; }
+
+    .sensor-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9CA3AF; }
+    .sensor-reading { margin: 12px 0 4px; }
+    .sensor-value { font-size: 3.5rem; font-weight: 900; color: #111827; line-height: 1; }
+    .sensor-value--spo2 { color: #1D4ED8; }
+    .sensor-unit { font-size: 1rem; font-weight: 600; color: #9CA3AF; }
+    .sensor-unit--lg { font-size: 1.2rem; }
+
+    .sensor-status { font-size: 0.8rem; font-weight: 700; margin: 4px 0; }
+    .sensor-status .is-ok   { color: #16A34A; }
+    .sensor-status .is-bad  { color: #DC2626; }
+    .sensor-status .is-idle { color: #9CA3AF; }
+
+    .sensor-device-value { margin: 12px 0; font-size: 1.3rem; font-weight: 900; color: #111827; line-height: 1.3; }
+    .sensor-device-value.is-alert { color: #DC2626; }
+    .sensor-sub { font-size: 0.75rem; color: #6B7280; }
+    .sensor-note { margin-top: 12px; background: #F9FAFB; border-radius: 8px; padding: 6px 10px; font-size: 0.68rem; color: #6B7280; }
+
+    .bpm-num { display: inline-block; animation: bpm-pulse 1.2s ease-in-out infinite; }
+
+    /* ---- Simulator IoT ---- */
+    .simulator {
+        background: linear-gradient(135deg, #FAF5FF, #F3E8FF);
+        border: 1.5px solid #DDD6FE; border-radius: 20px; padding: 1.5rem;
+    }
+    .simulator__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .simulator__title-group { display: flex; align-items: center; gap: 10px; }
+    .simulator__icon {
+        width: 36px; height: 36px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--siaga); color: #fff; font-size: 1rem;
+    }
+    .simulator__title { font-weight: 700; font-size: 0.9rem; color: #4C1D95; }
+    .simulator__subtitle { font-size: 0.68rem; color: #7C3AED; }
+    .simulator__endpoint { font-size: 0.68rem; color: #7C3AED; font-family: monospace; background: #EDE9FE; padding: 4px 8px; border-radius: 6px; }
+    .simulator__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .simulator__token { font-size: 0.68rem; color: #6D28D9; margin-top: 10px; }
+    .simulator__token code { background: #EDE9FE; padding: 1px 6px; border-radius: 4px; }
+    .simulator__empty { text-align: center; padding: 1rem; color: #DC2626; font-size: 0.85rem; font-weight: 600; }
+
+    .sim-btn {
+        display: flex; align-items: center; gap: 6px;
+        color: #fff; font-size: 0.78rem; font-weight: 700;
+        padding: 9px 16px; border-radius: 10px; border: none; transition: all 0.2s;
+    }
+    .sim-btn:hover { filter: brightness(0.92); }
+    .sim-btn--ok     { background: #16A34A; }
+    .sim-btn--danger { background: #DC2626; }
+    .sim-btn--warn   { background: #D97706; }
+    .sim-btn--device { background: #7C3AED; }
+
+    /* ---- Log sensor ---- */
+    .log-title { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-weight: 700; color: #111827; }
+    .log-title i { color: var(--siaga); }
+    .table-scroll { overflow-x: auto; }
+    .log-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .log-table thead tr { background: #F9FAFB; }
+    .log-table th { padding: 8px 12px; text-align: center; font-weight: 700; color: #374151; font-size: 0.7rem; text-transform: uppercase; }
+    .log-table th:first-child, .log-table td:first-child { text-align: left; }
+    .log-table tbody tr { border-top: 1px solid #F3F4F6; }
+    .log-table tbody tr.is-critical { background: #FFF1F2; }
+    .log-table td { padding: 9px 12px; text-align: center; }
+    .log-table td:first-child { color: #6B7280; }
+    .log-table .is-ok, .log-table .is-bad { font-weight: 700; }
+    .log-table .is-ok  { color: #15803D; }
+    .log-table .is-bad { color: #DC2626; }
+    .log-table .reed-state { font-size: 0.75rem; }
+
+    @keyframes bpm-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    @keyframes fade-in-down { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes monitor-ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+}

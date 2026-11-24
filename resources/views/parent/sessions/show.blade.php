@@ -34,7 +34,7 @@
                     <i class="fas fa-heartbeat text-red-300"></i> Pantau Sensor Sekarang
                 </a>
             @elseif($session->status === 'menunggu')
-                <form action="{{ route('parent.sessions.cancel', $session->id) }}" method="POST" onsubmit="return confirm('Batalkan permintaan sesi ini?');">
+                <form action="{{ route('parent.sessions.cancel', $session->id) }}" method="POST" data-confirm="Batalkan permintaan sesi ini?">
                     @csrf
                     <button type="submit" class="text-xs text-red-600 hover:text-red-800 font-bold underline">
                         Batalkan Sesi

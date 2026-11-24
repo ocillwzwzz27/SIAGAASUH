@@ -1,0 +1,62 @@
+/* Varian kartu login (memakai ilustrasi latar login-page.svg). */
+.auth-page:has(.auth-login) { background: #fff; }
+
+.auth-login {
+    position: relative;
+    max-width: 360px; border-radius: 0; box-shadow: none; overflow: visible;
+    background: #fff;
+}
+/* <img> background: menutupi seluruh kartu, di belakang konten */
+.auth-login__bg {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%; object-fit: fill; pointer-events: none;
+}
+.auth-login > .auth-card-header,
+.auth-login > .auth-card-body { position: relative; z-index: 1; }
+.auth-login .auth-card-header { min-height: 286px; padding: 78px 24px 56px; background: transparent; }
+.auth-login .auth-card-header::after { display: none; }
+.auth-login .auth-card-body { padding: 22px 33px 90px; }
+
+.auth-login .auth-logo {
+    width: 105px; height: 105px; margin-bottom: 2px;
+    background: transparent; border-radius: 14px; box-shadow: none;
+}
+.auth-login .auth-logo img { width: 105px; height: 105px; }
+.auth-login .auth-heading { position: relative; z-index: 1; margin-top: 2px; }
+.auth-login .auth-heading__title { font-size: 1.5rem; }
+.auth-login .auth-heading__subtitle { color: rgba(255, 255, 255, 0.92); font-size: 0.9rem; margin-top: 8px; }
+
+.login-field input {
+    height: 60px; padding-left: 50px;
+    border: 1px solid #d2d2d2; border-radius: 11px; background: #fff; font-size: 14px;
+}
+.login-field--password input { padding-right: 44px; }
+.login-field .input-icon { left: 15px; color: #8a20ea; font-size: 19px; }
+
+.login-forgot { text-align: right; }
+.login-forgot a { color: #8a20ea; font-size: 14px; font-weight: 600; text-decoration: none; }
+
+.login-submit {
+    height: 51px; padding: 0; margin-top: 12px;
+    border-radius: 10px; background: #8820e7; box-shadow: none; font-size: 15px;
+}
+.login-submit:hover { transform: none; background: #7817d5; }
+
+.auth-login .divider { margin: 26px 28px 24px; gap: 16px; }
+.auth-login .divider-line { background: #c8c8c8; }
+.auth-login .divider-text { color: #111; text-transform: none; letter-spacing: 0; font-size: 13px; }
+
+.auth-login .social-grid { gap: 23px; margin: 0 4px; }
+.auth-login .social-btn { height: 60px; padding: 10px; border: 1px solid #d2d2d2; border-radius: 15px; background: #fff; font-size: 25px; }
+
+.auth-login .auth-footer { margin-top: 42px; color: #111; font-size: 13px; }
+.auth-login .auth-footer a { color: #8a20ea; }
+.auth-login .demo-box { display: none; }
+
+@media (max-width: 420px) {
+    .auth-panel-right { padding: 0; align-items: flex-start; }
+    .auth-login { width: 100%; max-width: none; }
+}
+@media (min-width: 421px) {
+    .auth-login { border-radius: 24px; overflow: hidden; box-shadow: 0 8px 40px rgba(123, 47, 190, 0.12); }
+}

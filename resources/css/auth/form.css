@@ -1,0 +1,86 @@
+/* Selector :where() menjaga specificity tetap rendah agar mudah di-override. */
+:where(.auth-page) input[type='email'],
+:where(.auth-page) input[type='password'],
+:where(.auth-page) input[type='text'],
+:where(.auth-page) input[type='tel'],
+:where(.auth-page) input[type='number'],
+:where(.auth-page) input[type='date'],
+:where(.auth-page) select,
+:where(.auth-page) textarea {
+    width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px;
+    padding: 11px 16px; font-size: 0.875rem; font-family: var(--font-base);
+    outline: none; transition: all 0.2s; background: #fafafa; color: #1f2937;
+}
+:where(.auth-page) input:focus,
+:where(.auth-page) select:focus,
+:where(.auth-page) textarea:focus {
+    border-color: #9333EA; box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.12); background: #fff;
+}
+
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+.auth-form--compact { gap: 13px; }
+.auth-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.label-sm {
+    display: block; margin-bottom: 6px;
+    font-size: 0.72rem; font-weight: 600; color: #6b7280;
+    text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+.input-wrap { position: relative; }
+.input-wrap input { padding-left: 42px; }
+.input-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: #9ca3af; font-size: 0.85rem; pointer-events: none;
+}
+.input-icon--whatsapp { color: #25d366; }
+.input-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; padding: 0; cursor: pointer;
+    color: #9ca3af; font-size: 0.85rem;
+}
+
+.btn-purple {
+    width: 100%; margin-top: 4px; padding: 13px;
+    background: linear-gradient(135deg, #7B2FBE, #9333EA); color: #fff;
+    border: none; border-radius: 14px; cursor: pointer;
+    font-family: var(--font-base); font-weight: 700; font-size: 0.95rem;
+    box-shadow: 0 4px 20px rgba(123, 47, 190, 0.35); transition: all 0.25s;
+}
+.btn-purple:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(123, 47, 190, 0.5); }
+.btn-purple__icon { margin-right: 8px; }
+
+.auth-alert {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+    padding: 10px 14px; border-radius: 12px;
+    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; font-size: 0.8rem;
+}
+
+.auth-footer { text-align: center; margin-top: 16px; font-size: 0.8rem; color: #9ca3af; }
+.auth-footer a { color: var(--siaga); font-weight: 700; text-decoration: none; }
+
+.divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.divider-line { flex: 1; height: 1px; background: #f0e6ff; }
+.divider-text { font-size: 0.68rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+
+.social-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.social-btn {
+    border: 1.5px solid #ede9fe; background: #fafafa; padding: 10px;
+    border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 1rem;
+}
+.social-btn:hover { background: #f3e8ff; border-color: #c084fc; }
+.social-btn { display: flex; align-items: center; justify-content: center; }
+.social-btn__img { display: block; width: 25px; height: 25px; object-fit: contain; }
+
+.demo-box { margin-top: 16px; padding: 12px 14px; background: #faf5ff; border-radius: 14px; border: 1px solid #ede9fe; }
+.demo-box__title { margin-bottom: 8px; font-size: 0.65rem; font-weight: 700; color: #581c87; text-transform: uppercase; letter-spacing: 0.06em; }
+.demo-box__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.demo-btn {
+    font-size: 0.7rem; font-weight: 600; font-family: var(--font-base);
+    background: #fff; border: 1px solid #c084fc; color: var(--siaga);
+    padding: 4px 10px; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+}
+.demo-btn:hover { background: var(--siaga); color: #fff; }
+
+.auth-remember-box { width: 15px; height: 15px; accent-color: var(--siaga); cursor: pointer; flex-shrink: 0; }
+.auth-remember-label { font-size: 0.8rem; color: #6b7280; cursor: pointer; }

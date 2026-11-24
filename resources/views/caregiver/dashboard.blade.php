@@ -116,7 +116,7 @@
                             placeholder="Ceritakan aktivitas anak hari ini: waktu makan, tidur siang, kondisi kesehatan, dan hal penting lainnya..."
                             class="input text-sm"></textarea>
                     </div>
-                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menyelesaikan sesi pengasuhan ini?');"
+                    <button type="submit" data-confirm="Apakah Anda yakin ingin menyelesaikan sesi pengasuhan ini?"
                         class="btn-primary text-xs py-2.5 px-5 rounded-xl font-bold flex items-center gap-2">
                         <i class="fas fa-flag-checkered"></i> Akhiri Sesi & Kirim Laporan
                     </button>

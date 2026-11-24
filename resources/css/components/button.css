@@ -1,0 +1,43 @@
+@layer components {
+    .btn-primary {
+        display: inline-flex; align-items: center; justify-content: center;
+        background: var(--siaga); color: #fff;
+        padding: 10px 20px; border-radius: 12px;
+        font-weight: 600; font-size: 0.875rem;
+        border: none; transition: all 0.2s;
+    }
+    .btn-primary:hover {
+        background: var(--siaga-dark);
+        box-shadow: 0 4px 15px rgba(123, 47, 190, 0.4);
+        transform: translateY(-1px);
+    }
+
+    .btn-outline {
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 2px solid var(--siaga); color: var(--siaga); background: transparent;
+        padding: 9px 20px; border-radius: 12px;
+        font-weight: 600; font-size: 0.875rem; transition: all 0.2s;
+    }
+    .btn-outline:hover { background: var(--siaga); color: #fff; }
+    .btn-outline--sm { gap: 6px; padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; }
+
+    .btn-soft {
+        display: flex; align-items: center; gap: 6px;
+        background: #EDE9FE; color: var(--siaga);
+        font-size: 0.78rem; font-weight: 700;
+        padding: 7px 14px; border-radius: 10px; border: none;
+    }
+
+    .btn-chip {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: var(--siaga); color: #fff;
+        font-size: 0.72rem; font-weight: 700;
+        padding: 6px 14px; border-radius: 8px;
+    }
+    .btn-chip i { font-size: 0.65rem; }
+
+    .link-button {
+        background: none; border: none;
+        font-size: 0.72rem; font-weight: 600; color: var(--siaga);
+    }
+}

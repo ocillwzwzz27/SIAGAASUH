@@ -40,7 +40,7 @@
                             <a href="{{ route('parent.children.edit', $ch->id) }}" class="text-xs text-gray-400 hover:text-siaga p-1.5 rounded-lg hover:bg-purple-50">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('parent.children.destroy', $ch->id) }}" method="POST" onsubmit="return confirm('Hapus data anak ini?');">
+                            <form action="{{ route('parent.children.destroy', $ch->id) }}" method="POST" data-confirm="Hapus data anak ini?">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-xs text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50">

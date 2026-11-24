@@ -1,0 +1,25 @@
+/*
+ * Design tokens SiagaAsuh — satu-satunya tempat nilai warna/font didefinisikan.
+ * Dipakai oleh app.css (dashboard) dan auth.css (login/register).
+ */
+:root {
+    --font-base: 'Inter', system-ui, -apple-system, sans-serif;
+
+    --siaga: #7B2FBE;
+    --siaga-dark: #5B1D92;
+    --siaga-light: #A855F7;
+    --siaga-accent: #F59E0B;
+
+    --primary-50: #faf5ff;
+    --primary-100: #f3e8ff;
+    --primary-200: #e9d5ff;
+    --primary-300: #d8b4fe;
+    --primary-400: #c084fc;
+    --primary-500: #a855f7;
+    --primary-600: #9333ea;
+    --primary-700: #7e22ce;
+    --primary-800: #6b21a8;
+    --primary-900: #581c87;
+
+    --gradient-brand: linear-gradient(135deg, #5B1D92 0%, #7B2FBE 60%, #9333EA 100%);
+}

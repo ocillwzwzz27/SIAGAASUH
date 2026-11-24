@@ -122,32 +122,18 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <button type="button" onclick="submitVerify('terverifikasi')" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2">
+                <button type="button" data-verify="approve" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2">
                     <i class="fas fa-check-circle"></i> Setujui & Verifikasi
                 </button>
-                <button type="button" onclick="toggleTolak()" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2">
+                <button type="button" data-verify="reject" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2">
                     <i class="fas fa-times-circle"></i> Tolak Pendaftaran
                 </button>
             </div>
         </form>
     </div>
 </div>
-
-<script>
-    function toggleTolak() {
-        const container = document.getElementById('alasanContainer');
-        const actionInput = document.getElementById('actionInput');
-        if (container.classList.contains('hidden')) {
-            container.classList.remove('hidden');
-            actionInput.value = 'ditolak';
-        } else {
-            document.getElementById('verifyForm').submit();
-        }
-    }
-
-    function submitVerify(action) {
-        document.getElementById('actionInput').value = action;
-        document.getElementById('verifyForm').submit();
-    }
-</script>
 @endsection
+
+@push('scripts')
+    @vite('resources/js/pages/admin-caregiver-show.js')
+@endpush

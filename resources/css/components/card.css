@@ -1,0 +1,11 @@
+@layer components {
+    .card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f1f0fb;
+        padding: 1.5rem;
+    }
+
+    .gradient-purple { background: var(--gradient-brand); }
+}

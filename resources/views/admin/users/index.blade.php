@@ -62,7 +62,7 @@
                         </td>
                         <td class="py-3.5 px-4 text-center">
                             @if($u->id !== auth()->id())
-                                <form action="{{ route('admin.users.destroy', $u->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun ini?');" class="inline">
+                                <form action="{{ route('admin.users.destroy', $u->id) }}" method="POST" data-confirm="Apakah Anda yakin ingin menghapus akun ini?" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-500 hover:text-red-700 text-sm p-1.5 rounded-lg hover:bg-red-50 transition" title="Hapus Akun">

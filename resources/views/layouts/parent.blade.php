@@ -29,25 +29,19 @@
         <span>Riwayat Sesi</span>
     </a>
 
-    {{-- Divider --}}
-    <div style="border-top:1px solid rgba(255,255,255,0.15);margin:10px 0;"></div>
+    <div class="sidebar-divider"></div>
 
     {{-- Live Monitor jika ada sesi aktif --}}
     @php
         $activeSession = \App\Models\CareSession::where('parent_id', auth()->id())->where('status', 'berjalan')->first();
     @endphp
     @if($activeSession)
-        <div style="padding:4px 16px 6px;font-size:0.65rem;font-weight:700;color:rgba(233,213,255,0.5);letter-spacing:0.08em;text-transform:uppercase;">
-            LIVE MONITORING
-        </div>
-        <a href="{{ route('parent.sessions.monitor', $activeSession->id) }}"
-           style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-weight:700;font-size:0.85rem;box-shadow:0 4px 15px rgba(220,38,38,0.4);animation:pulse 2s infinite;">
+        <div class="sidebar-section-label sidebar-section-label--spaced">LIVE MONITORING</div>
+        <a href="{{ route('parent.sessions.monitor', $activeSession->id) }}" class="sidebar-live-link">
             <i class="fas fa-heartbeat"></i>
             <span>Pantau {{ $activeSession->child->nama }}</span>
         </a>
     @else
-        <div style="padding:4px 16px;font-size:0.65rem;font-weight:700;color:rgba(233,213,255,0.5);letter-spacing:0.08em;text-transform:uppercase;">
-            ORANG TUA
-        </div>
+        <div class="sidebar-section-label">ORANG TUA</div>
     @endif
 @endsection

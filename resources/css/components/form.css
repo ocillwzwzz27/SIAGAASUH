@@ -1,0 +1,11 @@
+@layer components {
+    .input {
+        width: 100%; background: #fff;
+        border: 1.5px solid #e5e7eb; border-radius: 12px;
+        padding: 10px 16px; font-size: 0.875rem;
+        outline: none; transition: all 0.2s;
+    }
+    .input:focus { border-color: var(--siaga-light); box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15); }
+
+    .label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+}

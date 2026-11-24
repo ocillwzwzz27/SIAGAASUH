@@ -1,0 +1,12 @@
+.auth-card--register { max-width: 440px; margin: 20px 0; }
+
+.role-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.role-option {
+    border: 2px solid #e5e7eb; border-radius: 14px; padding: 12px;
+    cursor: pointer; text-align: center; transition: all 0.2s;
+}
+.role-option input { display: none; }
+.role-option:has(input:checked) { border-color: var(--siaga); background: #faf5ff; }
+.role-option__emoji { font-size: 1.3rem; margin-bottom: 4px; }
+.role-option__name { font-size: 0.78rem; font-weight: 700; color: #374151; }
+.role-option__hint { font-size: 0.65rem; color: #9ca3af; margin-top: 1px; }

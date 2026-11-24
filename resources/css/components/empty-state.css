@@ -1,0 +1,22 @@
+@layer components {
+    .empty-state { text-align: center; padding: 2rem 0; color: #9CA3AF; }
+    .empty-state__icon {
+        width: 52px; height: 52px; margin: 0 auto 10px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: #D1FAE5; color: #22C55E; font-size: 1.4rem;
+    }
+    .empty-state__glyph { font-size: 2.5rem; margin-bottom: 8px; }
+    .empty-state__text { font-size: 0.85rem; }
+
+    .empty-card {
+        text-align: center; padding: 3rem 0; background: #fff;
+        border-radius: 20px; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+    }
+    .empty-card__icon {
+        width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: #EDE9FE; color: var(--siaga); font-size: 1.8rem;
+    }
+    .empty-card__title { font-weight: 700; color: #374151; }
+    .empty-card__text { font-size: 0.85rem; color: #9CA3AF; margin-top: 4px; }
+}
