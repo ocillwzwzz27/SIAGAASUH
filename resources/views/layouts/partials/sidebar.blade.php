@@ -3,7 +3,7 @@
     <div class="p-5 border-b border-white/20">
         <div class="sidebar-brand">
             <div class="sidebar-logo">
-                <img src="{{ asset('images/logo-full.png') }}" alt="SiagaAsuh">
+                <img src="{{ asset('images/logo-icon.png') }}" alt="SiagaAsuh">
             </div>
             <div>
                 <h1 class="sidebar-title">Siaga<span class="sidebar-title__accent">Asuh</span></h1>

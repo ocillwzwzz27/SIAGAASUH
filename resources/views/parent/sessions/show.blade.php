@@ -4,21 +4,17 @@
 @section('page-title', 'Detail Sesi Pengasuhan #' . $session->id)
 
 @section('content')
-<div class="max-w-3xl mx-auto space-y-6">
-    <a href="{{ route('parent.sessions.index') }}" class="inline-flex items-center gap-2 text-sm text-siaga font-semibold hover:underline">
-        <i class="fas fa-arrow-left"></i> Kembali ke Riwayat
-    </a>
-
+<div class="space-y-4">
     {{-- Status Banner --}}
-    <div class="card p-6 border-l-4
+    <div class="card p-4 border-l-4
         @if($session->status === 'berjalan') border-blue-500 bg-blue-50/40
         @elseif($session->status === 'selesai') border-green-500 bg-green-50/40
         @elseif($session->status === 'menunggu') border-yellow-500 bg-yellow-50/40
         @else border-gray-400 @endif">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-3">
             <div>
-                <span class="text-xs uppercase font-bold text-gray-500 tracking-wider">Status Sesi:</span>
-                <h3 class="text-xl font-extrabold text-gray-800 mt-0.5">{{ strtoupper($session->status) }}</h3>
+                <span class="text-[11px] uppercase font-bold text-gray-500 tracking-wider">Status Sesi:</span>
+                <h3 class="text-lg font-extrabold text-gray-800 mt-0.5">{{ strtoupper($session->status) }}</h3>
                 <p class="text-xs text-gray-500 mt-1">
                     @if($session->status === 'menunggu')
                         Permintaan telah dikirim ke pengasuh. Menunggu konfirmasi...
@@ -30,7 +26,7 @@
                 </p>
             </div>
             @if($session->status === 'berjalan')
-                <a href="{{ route('parent.sessions.monitor', $session->id) }}" class="btn-primary text-xs py-2 px-4 flex items-center gap-2 shadow-md">
+                <a href="{{ route('parent.sessions.monitor', $session->id) }}" class="w-full btn-primary text-xs py-2.5 px-4 flex items-center justify-center gap-2 shadow-md rounded-xl">
                     <i class="fas fa-heartbeat text-red-300"></i> Pantau Sensor Sekarang
                 </a>
             @elseif($session->status === 'menunggu')

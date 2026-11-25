@@ -116,7 +116,7 @@ class SessionController extends Controller
 
     public function monitor($id)
     {
-        $session = CareSession::with(['child.devices', 'caregiver', 'latestReading'])
+        $session = CareSession::with(['child.devices', 'caregiver.caregiverProfile', 'latestReading'])
             ->where('parent_id', auth()->id())
             ->where('status', 'berjalan')
             ->findOrFail($id);

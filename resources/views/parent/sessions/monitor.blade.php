@@ -1,8 +1,8 @@
 @extends('layouts.parent')
 
 @section('title', 'Live Monitor Kondisi Anak')
-@section('page-title', 'Live Monitor IoT: ' . $session->child->nama)
-@section('page-subtitle', 'Pemantauan detak jantung, kadar oksigen, dan sensor pengaman secara langsung')
+@section('page-title', 'Live Monitor: ' . $session->child->nama)
+@section('page-subtitle', 'Pantau detak jantung, status perangkat & info pengasuh')
 
 @push('scripts')
     @vite('resources/js/pages/monitor.js')
@@ -13,58 +13,72 @@
     $reading = $session->latestReading;
     $dev = $session->child->activeDevice;
     $readings = $session->sensorReadings()->latest()->take(5)->get();
+    $cg = $session->caregiver;
+    $cgProfile = $cg->caregiverProfile;
+
+    // Format nomor WA (08xxx -> 628xxx)
+    $rawPhone = preg_replace('/[^0-9]/', '', $cg->phone ?? '');
+    $waPhone = str_starts_with($rawPhone, '0') ? '62' . substr($rawPhone, 1) : $rawPhone;
+    $waText = urlencode("Halo {$cg->name}, saya orang tua dari {$session->child->nama} ingin menanyakan kondisi anak pada sesi pengasuhan SiagaAsuh.");
+    $waUrl = $waPhone ? "https://wa.me/{$waPhone}?text={$waText}" : '#';
+
+    $sertifikatPath = $cgProfile?->dokumen_surat_pengalaman;
+    $isCertImage = $sertifikatPath && preg_match('/\.(jpg|jpeg|png|webp)$/i', $sertifikatPath);
 @endphp
 
 <div id="monitor"
-     class="max-w-4xl mx-auto space-y-6"
+     class="space-y-4"
      data-sensor-url="{{ route('parent.sessions.sensor', $session->id) }}"
      data-simulate-url="{{ route('api.sensor.store') }}">
 
-    {{-- Header Status Bar --}}
+    {{-- 1. Header Status Sesi Aktif --}}
     <div class="monitor-status">
         <div class="monitor-status__info">
-            <div class="live-dot">
+            <div class="live-dot flex-shrink-0">
                 <span class="live-dot__ping"></span>
                 <span class="live-dot__core"></span>
             </div>
-            <div>
-                <h3 class="monitor-status__title">Transmisi Real-Time Aktif</h3>
+            <div class="min-w-0">
+                <h3 class="monitor-status__title truncate">Pemantauan Aktif</h3>
                 <p class="monitor-status__meta">
-                    Pengasuh: <strong>{{ $session->caregiver->name }}</strong>
-                    &middot; {{ $session->caregiver->phone }}
+                    Mulai {{ $session->started_at ? $session->started_at->format('H:i') : '-' }} WIB
                     &middot; Layanan {{ ucfirst($session->jenis_layanan) }}
                 </p>
             </div>
         </div>
-        <a href="{{ route('parent.sessions.show', $session->id) }}" class="btn-outline btn-outline--sm">
-            <i class="fas fa-info-circle"></i> Detail Sesi
+        <a href="{{ route('parent.sessions.show', $session->id) }}" class="btn-outline btn-outline--sm flex-shrink-0">
+            <i class="fas fa-info-circle"></i> Detail
         </a>
     </div>
 
-    {{-- Alert Box --}}
+    {{-- 2. Alert Box Kritis (Muncul Otomatis saat BPM Kritis / Gelang Terlepas) --}}
     <div id="alertBox" class="alert-critical">
         <div class="alert-critical__inner">
             <div class="alert-critical__icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div>
-                <h4 class="alert-critical__title" id="alertTitle">⚠️ PERINGATAN KONDISI KRITIS!</h4>
+            <div class="min-w-0 flex-1">
+                <h4 class="alert-critical__title" id="alertTitle">PERINGATAN KONDISI KRITIS!</h4>
                 <p class="alert-critical__desc" id="alertDesc">Data sensor mendeteksi kondisi di luar batas normal. Segera hubungi pengasuh!</p>
+                @if($waPhone)
+                    <a href="{{ $waUrl }}" target="_blank" class="inline-flex items-center gap-1.5 mt-2 bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition">
+                        <i class="fab fa-whatsapp"></i> Hubungi Pengasuh via WA
+                    </a>
+                @endif
             </div>
-            <button type="button" id="alertClose" class="alert-critical__close" aria-label="Tutup peringatan">
+            <button type="button" id="alertClose" class="alert-critical__close flex-shrink-0" aria-label="Tutup peringatan">
                 <i class="fas fa-times"></i>
             </button>
         </div>
     </div>
 
-    {{-- Sensor Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {{-- BPM --}}
+    {{-- 3. Dua Indikator Sensor Utama: Detak Jantung & Status Perangkat --}}
+    <div class="grid grid-cols-2 gap-3">
+        {{-- Detak Jantung (BPM) --}}
         <div class="sensor-card sensor-card--heart">
             <div class="sensor-icon sensor-icon--heart"><i class="fas fa-heartbeat"></i></div>
             <p class="sensor-label">Detak Jantung</p>
             <div class="sensor-reading">
                 <span class="bpm-num sensor-value" id="bpmValue">{{ $reading->bpm ?? '--' }}</span>
-                <span class="sensor-unit">BPM</span>
+                <span class="sensor-unit block mt-0.5">BPM</span>
             </div>
             <p class="sensor-status" id="bpmStatus">
                 @if($reading)
@@ -72,119 +86,135 @@
                         {{ strtoupper($reading->status_bpm) }}
                     </span>
                 @else
-                    <span class="is-idle">Menunggu sinyal...</span>
+                    <span class="is-idle">Menunggu sinyal</span>
                 @endif
             </p>
-            <div class="sensor-note">Batas Normal: 60 — 140 BPM</div>
+            <div class="sensor-note">Normal: 60–140 BPM</div>
         </div>
 
-        {{-- SpO2 --}}
-        <div class="sensor-card sensor-card--spo2">
-            <div class="sensor-icon sensor-icon--spo2"><i class="fas fa-lungs"></i></div>
-            <p class="sensor-label">Kadar Oksigen</p>
-            <div class="sensor-reading">
-                <span class="sensor-value sensor-value--spo2" id="spo2Value">{{ $reading->spo2 ?? '--' }}</span>
-                <span class="sensor-unit sensor-unit--lg">%</span>
-            </div>
-            <p class="sensor-status" id="spo2Status">
-                @if($reading && $reading->spo2)
-                    <span class="{{ $reading->spo2 >= 95 ? 'is-ok' : 'is-bad' }}">
-                        {{ $reading->spo2 >= 95 ? 'OPTIMAL' : 'WASPADA' }}
-                    </span>
-                @else
-                    <span class="is-idle">Menunggu data...</span>
-                @endif
-            </p>
-            <div class="sensor-note">Batas Normal: ≥ 95%</div>
-        </div>
-
-        {{-- Reed Switch --}}
+        {{-- Status Perangkat (Reed Switch) --}}
         <div class="sensor-card sensor-card--device" id="reedCard">
-            <div class="sensor-icon sensor-icon--device"><i class="fas fa-fingerprint"></i></div>
+            <div class="sensor-icon sensor-icon--device"><i class="fas fa-shield-alt"></i></div>
             <p class="sensor-label">Status Perangkat</p>
-            <div class="sensor-device-value" id="reedValue">
+            <div class="sensor-device-value text-sm sm:text-base" id="reedValue">
                 @if($reading)
-                    {{ $reading->reed_status ? '⚠️ TERLEPAS DARI ANAK' : '✅ TERPASANG AMAN' }}
+                    {{ $reading->reed_status ? '⚠️ TERLEPAS' : '✅ TERPASANG' }}
                 @else
-                    ✅ TERPASANG AMAN
+                    ✅ TERPASANG
                 @endif
             </div>
-            <p class="sensor-sub">Sensor magnetik wearable</p>
+            <p class="sensor-sub">Sensor pengaman gelang</p>
             <div class="sensor-note" id="updatedAt">
-                Terakhir update: {{ $reading ? $reading->recorded_at->diffForHumans() : 'baru saja' }}
+                Update: {{ $reading ? $reading->recorded_at->diffForHumans() : 'baru saja' }}
             </div>
         </div>
     </div>
 
-    {{-- Simulator IoT --}}
-    <div class="simulator">
-        <div class="simulator__head">
-            <div class="simulator__title-group">
-                <div class="simulator__icon"><i class="fas fa-microchip"></i></div>
-                <div>
-                    <h4 class="simulator__title">🧪 Alat Uji Sensor Wearable</h4>
-                    <p class="simulator__subtitle">Simulasi kirim data IoT dari mikrokontroler</p>
-                </div>
-            </div>
-            <span class="simulator__endpoint">POST /api/v1/sensor</span>
+    {{-- 4. Info Mitra Pengasuh Bertugas + Kontak WA + Bukti Lisensi/Sertifikasi --}}
+    <div class="card p-4 border border-purple-100 space-y-3.5">
+        <div class="flex items-center justify-between gap-2">
+            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Pengasuh Bertugas</h4>
+            <span class="badge-verified text-[10px]">
+                <i class="fas fa-check-circle"></i> Terverifikasi PT
+            </span>
         </div>
 
-        @if($dev)
-            @php
-                $presets = [
-                    ['class' => 'ok',     'icon' => 'fa-heart',               'label' => 'Normal (85 BPM, 98% SpO2)', 'bpm' => 85,  'spo2' => 98, 'reed' => false],
-                    ['class' => 'danger', 'icon' => 'fa-exclamation-triangle', 'label' => 'BPM Tinggi (152 BPM)',      'bpm' => 152, 'spo2' => 97, 'reed' => false],
-                    ['class' => 'warn',   'icon' => 'fa-lungs',               'label' => 'SpO2 Rendah (91%)',         'bpm' => 80,  'spo2' => 91, 'reed' => false],
-                    ['class' => 'device', 'icon' => 'fa-magnet',              'label' => 'Wearable Dilepas',          'bpm' => 90,  'spo2' => 98, 'reed' => true],
-                ];
-            @endphp
-            <div class="simulator__actions">
-                @foreach($presets as $p)
-                    <button type="button"
-                            class="sim-btn sim-btn--{{ $p['class'] }}"
-                            data-sim
-                            data-device-code="{{ $dev->device_code }}"
-                            data-device-token="{{ $dev->device_token }}"
-                            data-bpm="{{ $p['bpm'] }}"
-                            data-spo2="{{ $p['spo2'] }}"
-                            data-reed="{{ $p['reed'] ? 'true' : 'false' }}">
-                        <i class="fas {{ $p['icon'] }}"></i> {{ $p['label'] }}
-                    </button>
-                @endforeach
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-purple-100 text-siaga flex items-center justify-center font-bold text-lg flex-shrink-0">
+                {{ strtoupper(substr($cg->name, 0, 1)) }}
             </div>
-            <p class="simulator__token">
-                <i class="fas fa-info-circle"></i>
-                Token device: <code>{{ substr($dev->device_token, 0, 20) }}...</code>
-            </p>
-        @else
-            <div class="simulator__empty">
-                <i class="fas fa-exclamation-circle"></i>
-                Anak ini belum memiliki perangkat wearable yang terdaftar.
+            <div class="flex-1 min-w-0">
+                <h3 class="font-bold text-sm text-gray-900 truncate">{{ $cg->name }}</h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                    <i class="fab fa-whatsapp text-green-600 mr-1"></i>{{ $cg->phone ?? '-' }}
+                </p>
+                @if($cgProfile?->pendidikan_terakhir)
+                    <p class="text-[11px] text-purple-700 font-medium mt-0.5 truncate">
+                        <i class="fas fa-graduation-cap mr-1"></i>{{ $cgProfile->pendidikan_terakhir }}
+                    </p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Tombol Hubungi WA & Telepon --}}
+        @if($waPhone)
+            <div class="grid grid-cols-2 gap-2">
+                <a href="{{ $waUrl }}" target="_blank"
+                   class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm">
+                    <i class="fab fa-whatsapp text-sm"></i> Chat WhatsApp
+                </a>
+                <a href="tel:{{ $cg->phone }}"
+                   class="btn-outline text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5">
+                    <i class="fas fa-phone-alt"></i> Telepon
+                </a>
             </div>
         @endif
+
+        {{-- Lisensi & Sertifikasi Pengasuh --}}
+        <div class="pt-3 border-t border-gray-100 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                    <i class="fas fa-award text-amber-500"></i> Lisensi &amp; Sertifikasi Mengasuh
+                </span>
+                @if($sertifikatPath)
+                    <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        Tersertifikasi
+                    </span>
+                @else
+                    <span class="bg-gray-100 text-gray-500 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                        Belum Dilampirkan
+                    </span>
+                @endif
+            </div>
+
+            @if($cgProfile?->kompetensi)
+                <p class="text-[11px] text-gray-600 bg-gray-50 p-2.5 rounded-xl leading-relaxed">
+                    <strong class="text-gray-700">Keahlian:</strong> {{ $cgProfile->kompetensi }}
+                </p>
+            @endif
+
+            @if($sertifikatPath)
+                @if($isCertImage)
+                    <a href="{{ asset('storage/' . $sertifikatPath) }}" target="_blank" class="block group">
+                        <div class="relative rounded-xl overflow-hidden border border-purple-100 bg-gray-50">
+                            <img src="{{ asset('storage/' . $sertifikatPath) }}"
+                                 alt="Sertifikat / Lisensi {{ $cg->name }}"
+                                 class="w-full h-36 object-cover group-hover:opacity-95 transition">
+                            <span class="absolute bottom-2 right-2 bg-black/65 text-white text-[10px] font-semibold px-2.5 py-1 rounded-lg">
+                                <i class="fas fa-expand-alt mr-1"></i> Perbesar Sertifikat
+                            </span>
+                        </div>
+                    </a>
+                @else
+                    <a href="{{ asset('storage/' . $sertifikatPath) }}" target="_blank"
+                       class="w-full py-2 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-siaga text-xs font-bold flex items-center justify-center gap-2 transition">
+                        <i class="fas fa-file-pdf"></i> Lihat Dokumen Sertifikat / Lisensi
+                    </a>
+                @endif
+            @endif
+        </div>
     </div>
 
-    {{-- Riwayat Pembacaan Sensor --}}
+    {{-- 5. Riwayat Pembacaan Sensor Terbaru --}}
     @if($readings->count() > 0)
-        <div class="card">
-            <h4 class="log-title"><i class="fas fa-history"></i> Log Sensor Terbaru</h4>
+        <div class="card p-4 border border-purple-100">
+            <h4 class="log-title text-sm"><i class="fas fa-history"></i> Riwayat Sensor Terbaru</h4>
             <div class="table-scroll">
                 <table class="log-table">
                     <thead>
                         <tr>
                             <th>Waktu</th>
                             <th>BPM</th>
-                            <th>SpO2</th>
-                            <th>Reed</th>
+                            <th>Perangkat</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($readings as $r)
-                            <tr class="{{ $r->isCritical() ? 'is-critical' : '' }}">
+                            @php $isRowAlert = ($r->bpm < 60 || $r->bpm > 140 || $r->reed_status); @endphp
+                            <tr class="{{ $isRowAlert ? 'is-critical' : '' }}">
                                 <td>{{ $r->recorded_at->format('H:i:s') }}</td>
                                 <td class="{{ ($r->bpm < 60 || $r->bpm > 140) ? 'is-bad' : 'is-ok' }}">{{ $r->bpm }}</td>
-                                <td class="{{ ($r->spo2 && $r->spo2 < 95) ? 'is-bad' : 'is-ok' }}">{{ $r->spo2 ?? '-' }}%</td>
                                 <td>
                                     @if($r->reed_status)
                                         <span class="reed-state is-bad">⚠️ Lepas</span>
@@ -193,7 +223,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($r->isCritical())
+                                    @if($isRowAlert)
                                         <span class="status-pill status-pill--critical">KRITIS</span>
                                     @else
                                         <span class="status-pill status-pill--normal">NORMAL</span>
@@ -206,6 +236,51 @@
             </div>
         </div>
     @endif
+
+    {{-- 6. Panel Simulasi Uji Sensor (Collapsible agar tidak membingungkan Orang Tua) --}}
+    <details class="simulator">
+        <summary class="cursor-pointer list-none flex items-center justify-between gap-2">
+            <div class="simulator__title-group">
+                <div class="simulator__icon"><i class="fas fa-microchip"></i></div>
+                <div>
+                    <h4 class="simulator__title">Mode Uji Sensor Wearable</h4>
+                    <p class="simulator__subtitle">Ketuk untuk simulasi kirim data IoT</p>
+                </div>
+            </div>
+            <i class="fas fa-chevron-down text-xs text-purple-600"></i>
+        </summary>
+
+        <div class="mt-3 pt-3 border-t border-purple-200/70">
+            @if($dev)
+                @php
+                    $presets = [
+                        ['class' => 'ok',     'icon' => 'fa-heart',                'label' => 'Normal (85 BPM)',      'bpm' => 85,  'spo2' => 98, 'reed' => false],
+                        ['class' => 'danger', 'icon' => 'fa-exclamation-triangle', 'label' => 'BPM Tinggi (152 BPM)', 'bpm' => 152, 'spo2' => 97, 'reed' => false],
+                        ['class' => 'device', 'icon' => 'fa-magnet',               'label' => 'Gelang Terlepas',      'bpm' => 90,  'spo2' => 98, 'reed' => true],
+                    ];
+                @endphp
+                <div class="simulator__actions">
+                    @foreach($presets as $p)
+                        <button type="button"
+                                class="sim-btn sim-btn--{{ $p['class'] }}"
+                                data-sim
+                                data-device-code="{{ $dev->device_code }}"
+                                data-device-token="{{ $dev->device_token }}"
+                                data-bpm="{{ $p['bpm'] }}"
+                                data-spo2="{{ $p['spo2'] }}"
+                                data-reed="{{ $p['reed'] ? 'true' : 'false' }}">
+                            <i class="fas {{ $p['icon'] }}"></i> {{ $p['label'] }}
+                        </button>
+                    @endforeach
+                </div>
+            @else
+                <div class="simulator__empty">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Anak ini belum memiliki perangkat wearable yang terdaftar.
+                </div>
+            @endif
+        </div>
+    </details>
 
 </div>
 @endsection

@@ -1,6 +1,8 @@
 <div class="auth-panel-left">
     <div class="auth-hero">
-        <img class="auth-hero__logo" src="{{ asset('images/logo-full.png') }}" alt="SiagaAsuh Logo">
+        <div class="auth-hero__logo-wrap">
+            <img class="auth-hero__logo" src="{{ asset('images/logo-full.png') }}" alt="SiagaAsuh Logo">
+        </div>
         <h2 class="auth-hero__title">Platform Pengasuhan<br>Anak Terpercaya</h2>
         <p class="auth-hero__text">
             Temukan pengasuh terverifikasi,<br>pantau kondisi anak secara real-time<br>dengan teknologi IoT Wearable.

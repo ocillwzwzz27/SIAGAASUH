@@ -28,7 +28,10 @@
         @else
             <header class="parent-topbar border-b border-gray-100">
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('caregiver.dashboard') }}" class="w-9 h-9 rounded-full bg-purple-50 text-siaga flex items-center justify-center text-sm hover:bg-purple-100 transition">
+                    @php
+                        $backUrl = url()->previous() !== url()->current() ? url()->previous() : route('caregiver.dashboard');
+                    @endphp
+                    <a href="{{ $backUrl }}" class="w-9 h-9 rounded-full bg-purple-50 text-siaga flex items-center justify-center text-sm hover:bg-purple-100 transition">
                         <i class="fa-solid fa-arrow-left"></i>
                     </a>
                     <div>
@@ -156,7 +159,7 @@
                             <div class="w-9 h-9 rounded-xl bg-purple-100 text-siaga flex items-center justify-center">
                                 <i class="fa-solid fa-id-card"></i>
                             </div>
-                            <span class="text-sm font-semibold">Profil &amp; Dokumen KTP</span>
+                            <span class="text-sm font-semibold">Profil &amp; Berkas</span>
                         </div>
                         <i class="fa-solid fa-chevron-right text-xs text-gray-400"></i>
                     </a>

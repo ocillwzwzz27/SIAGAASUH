@@ -81,7 +81,7 @@
             <div class="flex-1 min-w-0">
                 <h4 class="font-bold text-xs">Status: Menunggu Verifikasi</h4>
                 <p class="text-[11px] text-yellow-700 mt-0.5 leading-relaxed">
-                    Pastikan NIK, kompetensi, dan foto KTP sudah lengkap agar admin segera menyetujui akun Anda.
+                    Pastikan NIK, kompetensi, serta 4 berkas wajib (KTP, SKCK, Surat Sehat, Surat Pengalaman) sudah lengkap agar admin segera menyetujui akun Anda.
                 </p>
                 <a href="{{ route('caregiver.profile.edit') }}" class="text-[11px] font-bold text-yellow-900 underline mt-1.5 inline-block">
                     Periksa Dokumen &rarr;
@@ -145,7 +145,8 @@
         </div>
     @endif
 
-    {{-- 4. Permintaan Sesi Masuk (Perlu Konfirmasi Terima/Tolak) --}}
+    {{-- 4. Permintaan Sesi Masuk (Hanya tampil jika sudah terverifikasi) --}}
+    @if($statusVerif === 'terverifikasi')
     <div class="parent-nearby-section">
         <div class="parent-nearby-header">
             <h3 class="parent-nearby-title">Permintaan Sesi Masuk</h3>
@@ -213,6 +214,7 @@
             <h3 class="text-lg font-extrabold text-siaga mt-0.5">{{ $profile->total_ulasan ?? 0 }}</h3>
         </div>
     </div>
+    @endif
 
     {{-- 6. Purple Features Bar (Quick Access seperti Orang Tua) --}}
     <div class="parent-features-bar mt-5">
@@ -233,7 +235,7 @@
                 <div class="parent-feature-box">
                     <i class="fa-solid fa-id-card text-siaga text-base"></i>
                 </div>
-                <span class="parent-feature-label">Profil &amp; KTP</span>
+                <span class="parent-feature-label">Profil &amp; Berkas</span>
             </a>
             <a href="{{ route('caregiver.notifications.index') }}" class="parent-feature-item">
                 <div class="parent-feature-box">

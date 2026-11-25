@@ -5,7 +5,7 @@
 <div class="auth-card auth-card--register">
     <div class="auth-card-header">
         <div class="auth-logo">
-            <img src="{{ asset('images/logo-icon.svg') }}" alt="Logo">
+            <img src="{{ asset('images/logo-card.png') }}" alt="Logo SiagaAsuh">
         </div>
         <div class="auth-brand">Siaga<span class="auth-brand__accent">Asuh</span></div>
         <div class="auth-heading">

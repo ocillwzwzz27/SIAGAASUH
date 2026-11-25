@@ -45,14 +45,14 @@ if (root) {
             );
         }
 
-        if (hasValue(data.spo2)) {
+        if (hasValue(data.spo2) && el.spo2Value && el.spo2Status) {
             const ok = data.spo2 >= SPO2_MIN;
             el.spo2Value.textContent = data.spo2;
             setStatus(el.spo2Status, ok ? 'OPTIMAL' : 'WASPADA', ok ? 'is-ok' : 'is-bad');
         }
 
-        if (data.reed_status !== undefined) {
-            el.reedValue.textContent = data.reed_status ? '⚠️ TERLEPAS DARI ANAK' : '✅ TERPASANG AMAN';
+        if (data.reed_status !== undefined && el.reedValue && el.reedCard) {
+            el.reedValue.textContent = data.reed_status ? '⚠️ TERLEPAS' : '✅ TERPASANG';
             el.reedValue.classList.toggle('is-alert', Boolean(data.reed_status));
             el.reedCard.classList.toggle('is-alert', Boolean(data.reed_status));
         }
@@ -66,17 +66,15 @@ if (root) {
 
     const renderAlert = (data) => {
         const bpmCritical = data.bpm && (data.bpm > BPM_MAX || data.bpm < BPM_MIN);
-        const spo2Critical = data.spo2 && data.spo2 < SPO2_MIN;
         const reedCritical = data.reed_status;
 
-        if (!bpmCritical && !spo2Critical && !reedCritical) {
+        if (!bpmCritical && !reedCritical) {
             el.alertBox.classList.remove('is-visible');
             return;
         }
 
         const messages = [];
         if (bpmCritical) messages.push(`BPM ${data.bpm} (${data.bpm > BPM_MAX ? 'TERLALU TINGGI' : 'TERLALU RENDAH'})`);
-        if (spo2Critical) messages.push(`SpO2 ${data.spo2}% (DI BAWAH NORMAL)`);
         if (reedCritical) messages.push('Perangkat TERLEPAS dari anak!');
 
         el.alertDesc.textContent = `${messages.join(' | ')} — Segera hubungi pengasuh!`;

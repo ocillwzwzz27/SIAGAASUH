@@ -5,61 +5,81 @@
 @section('page-subtitle', 'Detail lengkap dan ketersediaan pengasuh terverifikasi')
 
 @section('content')
-<div class="max-w-3xl mx-auto space-y-6">
-    <a href="{{ route('parent.caregivers.index') }}" class="inline-flex items-center gap-2 text-sm text-siaga font-semibold hover:underline">
-        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pengasuh
-    </a>
-
+<div class="space-y-4">
     {{-- Header Kartu Profil --}}
     <div class="card overflow-hidden p-0">
         {{-- Banner Gradient --}}
-        <div class="gradient-purple h-28 relative">
-            <div class="absolute -bottom-10 left-6">
-                <div class="w-20 h-20 bg-white rounded-2xl border-4 border-white shadow-xl flex items-center justify-center text-siaga font-bold text-3xl">
+        <div class="gradient-purple h-24 relative">
+            <div class="absolute -bottom-9 left-5">
+                <div class="w-18 h-18 bg-white rounded-2xl border-4 border-white shadow-lg flex items-center justify-center text-siaga font-bold text-2xl">
                     {{ strtoupper(substr($profile->user->name, 0, 1)) }}
                 </div>
             </div>
-            <div class="absolute top-4 right-4">
-                <span class="badge-verified text-xs px-3 py-1.5">
+            <div class="absolute top-3 right-3">
+                <span class="badge-verified text-[11px] px-2.5 py-1">
                     <i class="fas fa-shield-alt mr-1"></i> Terverifikasi SiagaAsuh
                 </span>
             </div>
         </div>
 
-        <div class="pt-14 p-6 space-y-4">
+        <div class="pt-12 p-5 space-y-4">
             <div class="flex items-start justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">{{ $profile->user->name }}</h2>
-                    <div class="flex items-center gap-2 mt-1 text-sm text-yellow-500">
-                        @php $rating = $profile->rating > 0 ? $profile->rating : 4.8; @endphp
-                        @for ($i = 1; $i <= 5; $i++)
-                            <i class="fas fa-star {{ $i <= floor($rating) ? 'text-yellow-400' : 'text-gray-300' }}"></i>
-                        @endfor
-                        <span class="text-gray-700 font-bold">{{ $rating }}</span>
-                        <span class="text-gray-400">({{ $profile->total_ulasan }} ulasan)</span>
+                    <h2 class="text-xl font-bold text-gray-800">{{ $profile->user->name }}</h2>
+                    <div class="flex items-center gap-1.5 mt-1 text-xs text-yellow-500">
+                        @if($profile->rating > 0)
+                            @for ($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star {{ $i <= floor($profile->rating) ? 'text-yellow-400' : 'text-gray-300' }}"></i>
+                            @endfor
+                            <span class="text-gray-700 font-bold">{{ number_format($profile->rating, 1) }}</span>
+                        @else
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <span class="text-gray-700 font-bold">Baru</span>
+                        @endif
+                        <span class="text-gray-400">({{ $profile->total_ulasan ?? 0 }} ulasan)</span>
                     </div>
-                    <p class="text-sm text-gray-500 mt-1">
-                        <i class="fas fa-phone-alt text-xs text-gray-400 mr-1"></i>{{ $profile->user->phone }}
+                    <p class="text-xs text-gray-500 mt-1.5">
+                        <i class="fas fa-phone-alt text-[11px] text-gray-400 mr-1"></i>{{ $profile->user->phone }}
                     </p>
+                    @if($profile->pendidikan_terakhir || $profile->alamat_domisili)
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            @if($profile->pendidikan_terakhir)
+                                <span class="inline-flex items-center gap-1 bg-purple-50 text-siaga text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                                    <i class="fas fa-graduation-cap"></i> {{ $profile->pendidikan_terakhir }}
+                                </span>
+                            @endif
+                            @if($profile->alamat_domisili)
+                                <span class="inline-flex items-center gap-1 bg-gray-100 text-gray-600 text-[11px] px-2.5 py-1 rounded-full">
+                                    <i class="fas fa-map-marker-alt text-siaga"></i> {{ Str::limit($profile->alamat_domisili, 36) }}
+                                </span>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
 
             {{-- Tarif Layanan --}}
-            <div class="grid grid-cols-3 gap-2 pt-2">
+            <div class="grid grid-cols-3 gap-2 pt-1">
                 <div class="bg-purple-50 rounded-2xl p-3 text-center border border-purple-100">
                     <i class="fas fa-sun text-siaga text-base mb-1"></i>
                     <p class="text-[10px] text-gray-500 font-semibold uppercase">Harian</p>
-                    <p class="font-extrabold text-siaga text-xs mt-0.5">Rp {{ number_format($profile->tarif_harian ?? 150000, 0, ',', '.') }}</p>
+                    <p class="font-extrabold text-siaga text-xs mt-0.5">
+                        {{ $profile->tarif_harian ? 'Rp ' . number_format($profile->tarif_harian, 0, ',', '.') : 'Sesuai PT' }}
+                    </p>
                 </div>
                 <div class="bg-red-50 rounded-2xl p-3 text-center border border-red-100">
                     <i class="fas fa-exclamation-triangle text-red-500 text-base mb-1"></i>
                     <p class="text-[10px] text-gray-500 font-semibold uppercase">Darurat</p>
-                    <p class="font-extrabold text-red-600 text-xs mt-0.5">Rp {{ number_format($profile->tarif_darurat ?? 200000, 0, ',', '.') }}</p>
+                    <p class="font-extrabold text-red-600 text-xs mt-0.5">
+                        {{ $profile->tarif_darurat ? 'Rp ' . number_format($profile->tarif_darurat, 0, ',', '.') : 'Sesuai PT' }}
+                    </p>
                 </div>
                 <div class="bg-indigo-50 rounded-2xl p-3 text-center border border-indigo-100">
                     <i class="fas fa-moon text-indigo-600 text-base mb-1"></i>
                     <p class="text-[10px] text-gray-500 font-semibold uppercase">Malam</p>
-                    <p class="font-extrabold text-indigo-700 text-xs mt-0.5">Rp {{ number_format($profile->tarif_malam ?? 180000, 0, ',', '.') }}</p>
+                    <p class="font-extrabold text-indigo-700 text-xs mt-0.5">
+                        {{ $profile->tarif_malam ? 'Rp ' . number_format($profile->tarif_malam, 0, ',', '.') : 'Sesuai PT' }}
+                    </p>
                 </div>
             </div>
 

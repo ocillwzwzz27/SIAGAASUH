@@ -4,13 +4,9 @@
 @section('page-title', 'Tambah Data Buah Hati')
 
 @section('content')
-<div class="max-w-xl mx-auto space-y-6">
-    <a href="{{ route('parent.children.index') }}" class="inline-flex items-center gap-2 text-sm text-siaga font-semibold hover:underline">
-        <i class="fas fa-arrow-left"></i> Kembali
-    </a>
-
-    <div class="card">
-        <form action="{{ route('parent.children.store') }}" method="POST" class="space-y-4">
+<div class="space-y-4">
+    <div class="card p-4 border border-purple-100">
+        <form action="{{ route('parent.children.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
 
             <div>
@@ -18,7 +14,7 @@
                 <input type="text" name="nama" value="{{ old('nama') }}" required placeholder="Contoh: Muhammad Rayhan" class="input text-sm">
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="label">Tanggal Lahir</label>
                     <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" required class="input text-sm">
@@ -30,6 +26,11 @@
                         <option value="perempuan">Perempuan</option>
                     </select>
                 </div>
+            </div>
+
+            <div>
+                <label class="label">Foto Anak (Opsional, maks. 2MB)</label>
+                <input type="file" name="foto" accept="image/*" class="input text-xs py-2 bg-gray-50">
             </div>
 
             <div>

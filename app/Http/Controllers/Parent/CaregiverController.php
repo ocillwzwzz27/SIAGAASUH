@@ -24,11 +24,20 @@ class CaregiverController extends Controller
 
         if ($request->filled('layanan')) {
             match ($request->layanan) {
-                'harian' => $query->whereNotNull('tarif_harian')->orderBy('tarif_harian'),
+                'harian', 'langganan' => $query->whereNotNull('tarif_harian')->orderBy('tarif_harian'),
                 'darurat' => $query->whereNotNull('tarif_darurat')->orderBy('tarif_darurat'),
                 'malam' => $query->whereNotNull('tarif_malam')->orderBy('tarif_malam'),
                 default => null,
             };
+        }
+
+        if ($request->filled('kebutuhan') && $request->kebutuhan === 'khusus') {
+            $query->where(function ($q) {
+                $q->where('kompetensi', 'like', '%khusus%')
+                    ->orWhere('kompetensi', 'like', '%kebutuhan%')
+                    ->orWhere('kompetensi', 'like', '%terapi%')
+                    ->orWhere('pengalaman', 'like', '%khusus%');
+            });
         }
 
         $caregivers = $query->orderByDesc('rating')

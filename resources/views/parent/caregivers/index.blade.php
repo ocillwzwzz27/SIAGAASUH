@@ -34,6 +34,7 @@
                     'harian' => 'Harian',
                     'darurat' => 'Darurat',
                     'malam' => 'Malam',
+                    'langganan' => 'Langganan',
                 ];
             @endphp
             @foreach($filters as $val => $label)

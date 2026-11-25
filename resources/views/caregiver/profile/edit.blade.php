@@ -23,6 +23,17 @@
         </div>
     </div>
 
+    {{-- Ringkasan Akun Utama --}}
+    <div class="card p-4 border border-purple-100 flex items-center gap-3">
+        <div class="w-11 h-11 rounded-full bg-purple-100 text-siaga flex items-center justify-center font-bold text-base flex-shrink-0">
+            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+        </div>
+        <div class="min-w-0">
+            <h4 class="font-bold text-sm text-gray-900 truncate">{{ auth()->user()->name }}</h4>
+            <p class="text-xs text-gray-500 truncate">{{ auth()->user()->email }} &middot; {{ auth()->user()->phone }}</p>
+        </div>
+    </div>
+
     {{-- Tarif Layanan yang Ditetapkan oleh Admin PT (Read-Only) --}}
     <div class="card p-4 border border-purple-100 bg-purple-50/40 space-y-2.5">
         <div class="flex items-center justify-between">

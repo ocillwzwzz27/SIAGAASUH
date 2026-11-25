@@ -13,7 +13,7 @@
     {{-- Header --}}
     <div class="auth-card-header">
         <div class="auth-logo">
-            <img src="{{ asset('images/auth/login-logo.svg') }}" alt="Logo SiagaAsuh">
+            <img src="{{ asset('images/logo-card.png') }}" alt="Logo SiagaAsuh">
         </div>
         <div class="auth-heading">
             <h2 class="auth-heading__title">Selamat Datang</h2>

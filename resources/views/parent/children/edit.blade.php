@@ -4,12 +4,8 @@
 @section('page-title', 'Edit Data Buah Hati')
 
 @section('content')
-<div class="max-w-xl mx-auto space-y-6">
-    <a href="{{ route('parent.children.index') }}" class="inline-flex items-center gap-2 text-sm text-siaga font-semibold hover:underline">
-        <i class="fas fa-arrow-left"></i> Kembali
-    </a>
-
-    <div class="card">
+<div class="space-y-4">
+    <div class="card p-4 border border-purple-100">
         <form action="{{ route('parent.children.update', $child->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             @method('PUT')
@@ -20,7 +16,7 @@
                     placeholder="Contoh: Muhammad Rayhan" class="input text-sm">
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="label">Tanggal Lahir</label>
                     <input type="date" name="tanggal_lahir"
@@ -33,6 +29,17 @@
                         <option value="perempuan" {{ $child->jenis_kelamin === 'perempuan' ? 'selected' : '' }}>Perempuan</option>
                     </select>
                 </div>
+            </div>
+
+            <div>
+                <label class="label">Foto Anak (Opsional, maks. 2MB)</label>
+                @if($child->foto)
+                    <div class="mb-2 flex items-center gap-3">
+                        <img src="{{ asset('storage/' . $child->foto) }}" alt="{{ $child->nama }}" class="w-12 h-12 rounded-xl object-cover border border-purple-100">
+                        <span class="text-[11px] text-gray-500">Foto saat ini tersimpan</span>
+                    </div>
+                @endif
+                <input type="file" name="foto" accept="image/*" class="input text-xs py-2 bg-gray-50">
             </div>
 
             <div>

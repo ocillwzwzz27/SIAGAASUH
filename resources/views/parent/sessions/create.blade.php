@@ -5,24 +5,21 @@
 @section('page-subtitle', 'Pilih anak dan jenis layanan pengasuhan yang Anda butuhkan')
 
 @section('content')
-<div class="max-w-2xl mx-auto space-y-6">
-    <a href="{{ route('parent.caregivers.index') }}" class="inline-flex items-center gap-2 text-sm text-siaga font-semibold hover:underline">
-        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pengasuh
-    </a>
-
+<div class="space-y-4">
     {{-- Detail Pengasuh Terpilih (Sesuai Figma) --}}
-    <div class="card p-5 border border-purple-200 bg-purple-50/30">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 bg-siaga text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-md">
+    <div class="card p-4 border border-purple-200 bg-purple-50/30">
+        <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 bg-siaga text-white rounded-2xl flex items-center justify-center font-bold text-lg shadow-md flex-shrink-0">
                 {{ strtoupper(substr($caregiver->name, 0, 1)) }}
             </div>
-            <div>
-                <h3 class="font-bold text-lg text-gray-800">{{ $caregiver->name }}</h3>
-                <div class="flex items-center gap-2 text-xs text-yellow-500">
+            <div class="min-w-0">
+                <h3 class="font-bold text-base text-gray-800 truncate">{{ $caregiver->name }}</h3>
+                <div class="flex flex-wrap items-center gap-2 text-xs text-yellow-500 mt-0.5">
                     <i class="fas fa-star"></i>
-                    <span class="font-bold text-gray-800">{{ $caregiver->caregiverProfile->rating ?? 4.8 }}</span>
+                    @php $cgRating = $caregiver->caregiverProfile->rating ?? 0; @endphp
+                    <span class="font-bold text-gray-800">{{ $cgRating > 0 ? number_format($cgRating, 1) : 'Baru' }}</span>
                     <span class="text-gray-400">({{ $caregiver->caregiverProfile->total_ulasan ?? 0 }} ulasan)</span>
-                    <span class="text-green-600 font-semibold ml-2"><i class="fas fa-shield-alt"></i> Terverifikasi</span>
+                    <span class="text-green-600 font-semibold"><i class="fas fa-shield-alt"></i> Terverifikasi</span>
                 </div>
             </div>
         </div>

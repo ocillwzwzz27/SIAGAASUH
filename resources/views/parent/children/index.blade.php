@@ -23,14 +23,18 @@
             </a>
         </div>
     @else
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-4">
             @foreach($children as $ch)
-                <div class="card space-y-4 border border-purple-100">
+                <div class="card p-4 space-y-4 border border-purple-100">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center gap-3.5">
-                            <div class="w-12 h-12 bg-purple-100 text-siaga rounded-2xl flex items-center justify-center font-bold text-xl">
-                                👶
-                            </div>
+                            @if($ch->foto)
+                                <img src="{{ asset('storage/' . $ch->foto) }}" alt="{{ $ch->nama }}" class="w-12 h-12 rounded-2xl object-cover border border-purple-100 flex-shrink-0">
+                            @else
+                                <div class="w-12 h-12 bg-purple-100 text-siaga rounded-2xl flex items-center justify-center font-bold text-xl flex-shrink-0">
+                                    👶
+                                </div>
+                            @endif
                             <div>
                                 <h4 class="font-bold text-base text-gray-800">{{ $ch->nama }}</h4>
                                 <p class="text-xs text-gray-500">Usia: {{ $ch->umur }} · {{ ucfirst($ch->jenis_kelamin) }}</p>

@@ -26,7 +26,10 @@
         @else
             <header class="parent-topbar border-b border-gray-100">
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('parent.dashboard') }}" class="w-9 h-9 rounded-full bg-purple-50 text-siaga flex items-center justify-center text-sm hover:bg-purple-100 transition">
+                    @php
+                        $backUrl = url()->previous() !== url()->current() ? url()->previous() : route('parent.dashboard');
+                    @endphp
+                    <a href="{{ $backUrl }}" class="w-9 h-9 rounded-full bg-purple-50 text-siaga flex items-center justify-center text-sm hover:bg-purple-100 transition">
                         <i class="fa-solid fa-arrow-left"></i>
                     </a>
                     <div>

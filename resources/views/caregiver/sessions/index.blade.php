@@ -42,7 +42,7 @@
             <div class="card p-4 border border-purple-100 space-y-3">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
-                        <h4 class="font-bold text-sm text-gray-800 truncate">{{ $s->child->nama }}</h4>
+                        <h4 class="font-bold text-sm text-gray-800 truncate">{{ $s->child->nama }} ({{ $s->child->umur }})</h4>
                         <p class="text-xs text-gray-500 mt-0.5 truncate">Ortu: {{ $s->parent->name }} &middot; {{ $s->parent->phone }}</p>
                     </div>
                     <span class="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 {{ $statusBadge }}">
@@ -54,6 +54,12 @@
                     <span class="uppercase font-semibold text-purple-700">{{ $s->jenis_layanan }}</span>
                     <span>{{ $s->created_at->format('d M Y, H:i') }}</span>
                 </div>
+
+                @if($s->child->catatan_kesehatan)
+                    <div class="p-2.5 bg-amber-50/70 border border-amber-100 rounded-xl text-[11px] text-amber-900">
+                        <strong class="text-amber-800"><i class="fa-solid fa-notes-medical mr-1"></i>Kesehatan/Alergi Anak:</strong> {{ $s->child->catatan_kesehatan }}
+                    </div>
+                @endif
 
                 @if($s->catatan_orang_tua)
                     <div class="p-2.5 bg-gray-50 rounded-xl text-[11px] text-gray-600">

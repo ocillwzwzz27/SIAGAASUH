@@ -4,19 +4,19 @@
 
 @section('custom-header')
     <header class="parent-topbar">
-        {{-- Lokasi Anda: GondangManis, Kudus --}}
-        <div class="parent-location-wrap" title="Ganti Lokasi">
+        {{-- Lokasi Anda (Interaktif) --}}
+        <button type="button" id="btn-location-picker" class="parent-location-wrap text-left" title="Ganti Lokasi">
             <div class="parent-location-pin">
                 <i class="fa-solid fa-location-dot"></i>
             </div>
             <div class="parent-location-text">
                 <span class="parent-location-label">Lokasi Anda</span>
                 <span class="parent-location-name">
-                    GondangManis, Kudus
+                    <span id="current-location-name">GondangManis, Kudus</span>
                     <i class="fa-solid fa-chevron-down parent-location-chevron"></i>
                 </span>
             </div>
-        </div>
+        </button>
 
         {{-- Action Buttons: Notifikasi & Akun --}}
         <div class="parent-top-actions">
@@ -266,4 +266,51 @@
         </div>
     </div>
 
+    {{-- Modal Pilih Lokasi --}}
+    <div id="location-modal" class="fixed inset-0 z-50 hidden">
+        <div id="location-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-xs"></div>
+        <div class="absolute bottom-0 inset-x-0 max-w-[430px] mx-auto bg-white rounded-t-3xl p-5 shadow-2xl">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
+            <h4 class="font-bold text-sm text-gray-900 mb-3">Pilih Lokasi Layanan</h4>
+            <div class="space-y-2">
+                @foreach(['GondangManis, Kudus', 'Kota Kudus, Kudus', 'Jepara Kota, Jepara', 'Pati Kota, Pati', 'Semarang Tengah, Semarang'] as $loc)
+                    <button type="button" class="location-option w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold border border-gray-100 hover:bg-purple-50 hover:border-purple-200 flex items-center justify-between transition" data-loc="{{ $loc }}">
+                        <span><i class="fa-solid fa-location-dot text-siaga mr-2"></i>{{ $loc }}</span>
+                        <i class="fa-solid fa-check text-siaga hidden check-icon"></i>
+                    </button>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('btn-location-picker');
+    const modal = document.getElementById('location-modal');
+    const backdrop = document.getElementById('location-backdrop');
+    const label = document.getElementById('current-location-name');
+    if (!btn || !modal || !label) return;
+
+    const saved = localStorage.getItem('siagaasuh_location');
+    if (saved) label.textContent = saved;
+
+    const open = () => modal.classList.remove('hidden');
+    const close = () => modal.classList.add('hidden');
+
+    btn.addEventListener('click', open);
+    backdrop?.addEventListener('click', close);
+
+    document.querySelectorAll('.location-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            const loc = opt.dataset.loc;
+            label.textContent = loc;
+            localStorage.setItem('siagaasuh_location', loc);
+            close();
+        });
+    });
+});
+</script>
+@endpush
