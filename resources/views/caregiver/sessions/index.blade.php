@@ -1,77 +1,108 @@
 @extends('layouts.caregiver')
 
 @section('title', 'Sesi Pengasuhan')
-@section('page-title', 'Daftar Semua Sesi Pengasuhan')
-@section('page-subtitle', 'Kelola sesi pengasuhan yang sedang berjalan atau riwayat yang telah selesai')
+@section('page-title', 'Daftar Sesi Pengasuhan')
+@section('page-subtitle', 'Kelola permintaan, sesi berjalan & riwayat')
 
 @section('content')
-<div class="card space-y-4 max-w-5xl mx-auto">
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">
-                    <th class="py-3.5 px-4">Anak</th>
-                    <th class="py-3.5 px-4">Orang Tua</th>
-                    <th class="py-3.5 px-4">Layanan</th>
-                    <th class="py-3.5 px-4">Status</th>
-                    <th class="py-3.5 px-4">Tanggal</th>
-                    <th class="py-3.5 px-4 text-center">Tindakan</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 text-sm">
-                @forelse($sessions as $s)
-                    <tr class="hover:bg-purple-50/30 transition">
-                        <td class="py-4 px-4 font-bold text-gray-800">{{ $s->child->nama }}</td>
-                        <td class="py-4 px-4">
-                            <div class="font-medium text-gray-800">{{ $s->parent->name }}</div>
-                            <div class="text-xs text-gray-400">{{ $s->parent->phone }}</div>
-                        </td>
-                        <td class="py-4 px-4 text-xs uppercase font-medium text-purple-700">{{ $s->jenis_layanan }}</td>
-                        <td class="py-4 px-4">
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full
-                                @if($s->status === 'berjalan') bg-blue-100 text-blue-700
-                                @elseif($s->status === 'selesai') bg-green-100 text-green-700
-                                @elseif($s->status === 'menunggu') bg-yellow-100 text-yellow-700
-                                @else bg-gray-100 text-gray-600 @endif">
-                                {{ ucfirst($s->status) }}
-                            </span>
-                        </td>
-                        <td class="py-4 px-4 text-xs text-gray-500">
-                            {{ $s->created_at->format('d M Y H:i') }}
-                        </td>
-                        <td class="py-4 px-4 text-center">
-                            @if($s->status === 'menunggu')
-                                <div class="flex items-center justify-center gap-2">
-                                    <form action="{{ route('caregiver.sessions.confirm', $s->id) }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="action" value="terima">
-                                        <button type="submit" class="bg-green-600 text-white text-xs py-1 px-2.5 rounded-lg font-bold">Terima</button>
-                                    </form>
-                                    <form action="{{ route('caregiver.sessions.confirm', $s->id) }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="action" value="tolak">
-                                        <button type="submit" class="bg-red-500 text-white text-xs py-1 px-2.5 rounded-lg font-bold">Tolak</button>
-                                    </form>
-                                </div>
-                            @elseif($s->status === 'berjalan')
-                                <a href="{{ route('caregiver.dashboard') }}" class="btn-primary text-xs py-1.5 px-3">
-                                    Akhiri Sesi
-                                </a>
-                            @else
-                                <span class="text-xs text-gray-400">Selesai</span>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-gray-400">Belum ada sesi pengasuhan.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+<div class="space-y-4">
+    {{-- Filter Status Pills --}}
+    <div class="flex items-center gap-2 overflow-x-auto pb-1">
+        @php
+            $statusAktif = request('status');
+            $filters = [
+                '' => 'Semua',
+                'menunggu' => 'Menunggu',
+                'berjalan' => 'Berjalan',
+                'selesai' => 'Selesai',
+                'ditolak' => 'Ditolak',
+            ];
+        @endphp
+        @foreach($filters as $val => $label)
+            <a href="{{ route('caregiver.sessions.index', array_filter(['status' => $val ?: null])) }}"
+               class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition
+               {{ $statusAktif === ($val ?: null) ? 'bg-siaga text-white shadow-sm' : 'bg-purple-50 text-gray-600 hover:bg-purple-100' }}">
+                {{ $label }}
+            </a>
+        @endforeach
     </div>
 
-    <div class="mt-4">
+    {{-- Mobile Card List --}}
+    <div class="space-y-3">
+        @forelse($sessions as $s)
+            @php
+                $statusBadge = match ($s->status) {
+                    'berjalan' => 'bg-blue-100 text-blue-700',
+                    'selesai'  => 'bg-green-100 text-green-700',
+                    'menunggu' => 'bg-yellow-100 text-yellow-700',
+                    'ditolak'  => 'bg-red-100 text-red-700',
+                    default    => 'bg-gray-100 text-gray-600',
+                };
+            @endphp
+            <div class="card p-4 border border-purple-100 space-y-3">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-sm text-gray-800 truncate">{{ $s->child->nama }}</h4>
+                        <p class="text-xs text-gray-500 mt-0.5 truncate">Ortu: {{ $s->parent->name }} &middot; {{ $s->parent->phone }}</p>
+                    </div>
+                    <span class="text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 {{ $statusBadge }}">
+                        {{ ucfirst($s->status) }}
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+                    <span class="uppercase font-semibold text-purple-700">{{ $s->jenis_layanan }}</span>
+                    <span>{{ $s->created_at->format('d M Y, H:i') }}</span>
+                </div>
+
+                @if($s->catatan_orang_tua)
+                    <div class="p-2.5 bg-gray-50 rounded-xl text-[11px] text-gray-600">
+                        <strong class="text-gray-700">Catatan Orang Tua:</strong> {{ $s->catatan_orang_tua }}
+                    </div>
+                @endif
+
+                @if($s->ringkasan)
+                    <div class="p-2.5 bg-purple-50/60 rounded-xl text-[11px] text-gray-700">
+                        <strong class="text-siaga">Ringkasan Anda:</strong> {{ $s->ringkasan }}
+                    </div>
+                @endif
+
+                {{-- Aksi sesuai status --}}
+                @if($s->status === 'menunggu')
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <form action="{{ route('caregiver.sessions.confirm', $s->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="action" value="terima">
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 rounded-xl transition">
+                                <i class="fa-solid fa-check mr-1"></i> Terima
+                            </button>
+                        </form>
+                        <form action="{{ route('caregiver.sessions.confirm', $s->id) }}" method="POST" data-confirm="Tolak permintaan sesi ini?">
+                            @csrf
+                            <input type="hidden" name="action" value="tolak">
+                            <button type="submit" class="w-full bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-2 rounded-xl transition">
+                                <i class="fa-solid fa-xmark mr-1"></i> Tolak
+                            </button>
+                        </form>
+                    </div>
+                @elseif($s->status === 'berjalan')
+                    <div class="pt-1">
+                        <a href="{{ route('caregiver.dashboard') }}" class="w-full btn-primary text-xs py-2 rounded-xl flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-flag-checkered"></i> Akhiri Sesi di Beranda
+                        </a>
+                    </div>
+                @endif
+            </div>
+        @empty
+            <div class="empty-card">
+                <div class="empty-card__icon"><i class="fas fa-clipboard-list"></i></div>
+                <h3 class="empty-card__title">Belum Ada Sesi</h3>
+                <p class="empty-card__text">Permintaan dan riwayat sesi pengasuhan akan tampil di sini.</p>
+            </div>
+        @endforelse
+    </div>
+
+    <div class="pt-2">
         {{ $sessions->links() }}
     </div>
 </div>

@@ -150,68 +150,43 @@
     </div>
 
     {{-- 3. Pengasuh Terdekat Container --}}
-    @php
-        $dbCaregivers = \App\Models\CaregiverProfile::with('user')
-            ->where('status_verifikasi', 'terverifikasi')
-            ->take(3)
-            ->get();
-
-        // Data default yang persis seperti pada gambar mockup
-        $defaultCaregivers = [
-            [
-                'name' => 'Triana Putri',
-                'rating' => '4.9',
-                'ulasan' => 87,
-                'id' => $dbCaregivers->get(0)->id ?? null,
-            ],
-            [
-                'name' => 'Putri Dayarsi',
-                'rating' => '4.7',
-                'ulasan' => 64,
-                'id' => $dbCaregivers->get(1)->id ?? null,
-            ],
-            [
-                'name' => 'Siska Putri',
-                'rating' => '4.2',
-                'ulasan' => 31,
-                'id' => $dbCaregivers->get(2)->id ?? null,
-            ],
-        ];
-    @endphp
-
     <div class="parent-nearby-section">
         <div class="parent-nearby-header">
             <h3 class="parent-nearby-title">Pengasuh Terdekat</h3>
             <a href="{{ route('parent.caregivers.index') }}" class="parent-nearby-link">Lihat Semua</a>
         </div>
 
-        <div class="parent-nearby-grid">
-            @foreach($defaultCaregivers as $cg)
-                <div class="parent-caregiver-card">
-                    <div class="parent-caregiver-avatar">
-                        <i class="fa-solid fa-user text-lg"></i>
-                    </div>
-
-                    <div>
-                        <h4 class="parent-caregiver-name" title="{{ $cg['name'] }}">{{ $cg['name'] }}</h4>
-                        <div class="parent-caregiver-rating">
-                            <i class="fa-solid fa-star parent-caregiver-star"></i>
-                            <span class="parent-caregiver-score">{{ $cg['rating'] }}</span>
-                            <span class="parent-caregiver-reviews">({{ $cg['ulasan'] }} ulasan)</span>
-                        </div>
-                    </div>
-
+        @if($rekomendasi_pengasuh->isEmpty())
+            <div class="bg-white rounded-2xl p-5 text-center border border-purple-100">
+                <p class="text-xs text-gray-500">Belum ada pengasuh terverifikasi yang tersedia saat ini.</p>
+            </div>
+        @else
+            <div class="parent-nearby-grid">
+                @foreach($rekomendasi_pengasuh as $cg)
                     @php
-                        $orderUrl = !empty($cg['id'])
-                            ? route('parent.caregivers.show', $cg['id'])
-                            : route('parent.caregivers.index');
+                        $rating = $cg->rating > 0 ? number_format($cg->rating, 1) : 'Baru';
                     @endphp
-                    <a href="{{ $orderUrl }}" class="parent-caregiver-btn">
-                        Pesan Sekarang
-                    </a>
-                </div>
-            @endforeach
-        </div>
+                    <div class="parent-caregiver-card">
+                        <div class="parent-caregiver-avatar">
+                            {{ strtoupper(substr($cg->user->name, 0, 1)) }}
+                        </div>
+
+                        <div>
+                            <h4 class="parent-caregiver-name" title="{{ $cg->user->name }}">{{ $cg->user->name }}</h4>
+                            <div class="parent-caregiver-rating">
+                                <i class="fa-solid fa-star parent-caregiver-star"></i>
+                                <span class="parent-caregiver-score">{{ $rating }}</span>
+                                <span class="parent-caregiver-reviews">({{ $cg->total_ulasan ?? 0 }})</span>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('parent.caregivers.show', $cg->id) }}" class="parent-caregiver-btn">
+                            Pesan Sekarang
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     {{-- 4. Banner Layanan Aman & Terpercaya --}}

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Parent;
 
 use App\Http\Controllers\Controller;
+use App\Models\CaregiverProfile;
 use App\Models\CareSession;
 use App\Models\AppNotification;
 
@@ -36,8 +37,19 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $rekomendasi_pengasuh = CaregiverProfile::with('user')
+            ->where('status_verifikasi', 'terverifikasi')
+            ->orderByDesc('rating')
+            ->take(3)
+            ->get();
+
         return view('parent.dashboard', compact(
-            'sesi_aktif', 'sesi_menunggu', 'total_sesi', 'notifikasi', 'riwayat_sesi'
+            'sesi_aktif',
+            'sesi_menunggu',
+            'total_sesi',
+            'notifikasi',
+            'riwayat_sesi',
+            'rekomendasi_pengasuh'
         ));
     }
 }

@@ -9,19 +9,24 @@ use Illuminate\Http\Request;
 
 class SessionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sessions = CareSession::with(['parent', 'child'])
-            ->where('caregiver_id', auth()->id())
-            ->latest()
-            ->paginate(10);
+        $query = CareSession::with(['parent', 'child'])
+            ->where('caregiver_id', auth()->id());
+
+        if ($request->filled('status') && in_array($request->status, ['menunggu', 'berjalan', 'selesai', 'ditolak', 'dibatalkan'])) {
+            $query->where('status', $request->status);
+        }
+
+        $sessions = $query->latest()->paginate(10)->withQueryString();
 
         return view('caregiver.sessions.index', compact('sessions'));
     }
 
     public function confirm(Request $request, $id)
     {
-        $session = CareSession::where('caregiver_id', auth()->id())
+        $session = CareSession::with('child')
+            ->where('caregiver_id', auth()->id())
             ->where('status', 'menunggu')
             ->findOrFail($id);
 
@@ -30,6 +35,19 @@ class SessionController extends Controller
         ]);
 
         if ($request->action === 'terima') {
+            $profile = auth()->user()->caregiverProfile;
+            if (!$profile || $profile->status_verifikasi !== 'terverifikasi') {
+                return back()->with('error', 'Akun Anda belum terverifikasi admin sehingga belum dapat menerima sesi.');
+            }
+
+            $adaSesiBerjalan = CareSession::where('caregiver_id', auth()->id())
+                ->where('status', 'berjalan')
+                ->exists();
+
+            if ($adaSesiBerjalan) {
+                return back()->with('error', 'Anda masih memiliki sesi yang sedang berjalan. Selesaikan sesi aktif terlebih dahulu.');
+            }
+
             $session->update([
                 'status' => 'berjalan',
                 'started_at' => now(),
@@ -42,24 +60,27 @@ class SessionController extends Controller
                 'layanan',
                 $session->id
             );
-        } else {
-            $session->update(['status' => 'ditolak']);
 
-            AppNotification::kirim(
-                $session->parent_id,
-                '❌ Permintaan Sesi Ditolak',
-                auth()->user()->name . ' tidak dapat menerima permintaan pengasuhan saat ini.',
-                'layanan',
-                $session->id
-            );
+            return back()->with('success', 'Sesi pengasuhan diterima dan resmi berjalan.');
         }
 
-        return back()->with('success', 'Status sesi berhasil diperbarui.');
+        $session->update(['status' => 'ditolak']);
+
+        AppNotification::kirim(
+            $session->parent_id,
+            '❌ Permintaan Sesi Ditolak',
+            auth()->user()->name . ' tidak dapat menerima permintaan pengasuhan saat ini.',
+            'layanan',
+            $session->id
+        );
+
+        return back()->with('success', 'Permintaan sesi telah ditolak.');
     }
 
     public function end(Request $request, $id)
     {
-        $session = CareSession::where('caregiver_id', auth()->id())
+        $session = CareSession::with('child')
+            ->where('caregiver_id', auth()->id())
             ->where('status', 'berjalan')
             ->findOrFail($id);
 

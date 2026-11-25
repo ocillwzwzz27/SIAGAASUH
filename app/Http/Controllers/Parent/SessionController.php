@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\CareSession;
 use App\Models\Child;
 use App\Models\User;
-use App\Models\CaregiverProfile;
 use App\Models\AppNotification;
 use Illuminate\Http\Request;
 
@@ -15,7 +14,11 @@ class SessionController extends Controller
     public function create(Request $request)
     {
         $caregiverId = $request->caregiver_id;
-        $caregiver = User::with('caregiverProfile')->findOrFail($caregiverId);
+        $caregiver = User::with('caregiverProfile')
+            ->where('role', 'pengasuh')
+            ->whereHas('caregiverProfile', fn ($q) => $q->where('status_verifikasi', 'terverifikasi'))
+            ->findOrFail($caregiverId);
+
         $children = auth()->user()->children()->with('devices')->get();
 
         return view('parent.sessions.create', compact('caregiver', 'children'));
@@ -27,7 +30,17 @@ class SessionController extends Controller
             'caregiver_id' => 'required|exists:users,id',
             'child_id' => 'required|exists:children,id',
             'jenis_layanan' => 'required|in:harian,darurat,malam',
+            'catatan_orang_tua' => 'nullable|string|max:500',
         ]);
+
+        // Pastikan pengasuh valid & sudah terverifikasi
+        $caregiver = User::where('role', 'pengasuh')
+            ->whereHas('caregiverProfile', fn ($q) => $q->where('status_verifikasi', 'terverifikasi'))
+            ->find($request->caregiver_id);
+
+        if (!$caregiver) {
+            return back()->with('error', 'Pengasuh yang dipilih belum terverifikasi atau tidak tersedia.');
+        }
 
         $child = Child::where('parent_id', auth()->id())->findOrFail($request->child_id);
 
@@ -42,15 +55,16 @@ class SessionController extends Controller
 
         $session = CareSession::create([
             'parent_id' => auth()->id(),
-            'caregiver_id' => $request->caregiver_id,
-            'child_id' => $request->child_id,
+            'caregiver_id' => $caregiver->id,
+            'child_id' => $child->id,
             'jenis_layanan' => $request->jenis_layanan,
+            'catatan_orang_tua' => $request->catatan_orang_tua,
             'status' => 'menunggu',
         ]);
 
         // Notifikasi ke pengasuh
         AppNotification::kirim(
-            $request->caregiver_id,
+            $caregiver->id,
             '📋 Permintaan Sesi Pengasuhan Baru',
             auth()->user()->name . ' meminta Anda untuk mengasuh ' . $child->nama . '. Silakan konfirmasi.',
             'layanan',
@@ -65,7 +79,7 @@ class SessionController extends Controller
     {
         $session = CareSession::with([
             'caregiver.caregiverProfile', 'child',
-            'sensorReadings' => fn($q) => $q->latest()->take(20),
+            'sensorReadings' => fn ($q) => $q->latest()->take(20),
         ])->where('parent_id', auth()->id())->findOrFail($id);
 
         return view('parent.sessions.show', compact('session'));
@@ -102,7 +116,7 @@ class SessionController extends Controller
 
     public function monitor($id)
     {
-        $session = CareSession::with(['child.devices', 'latestReading'])
+        $session = CareSession::with(['child.devices', 'caregiver', 'latestReading'])
             ->where('parent_id', auth()->id())
             ->where('status', 'berjalan')
             ->findOrFail($id);

@@ -37,19 +37,24 @@ class ProfileController extends Controller
         }
 
         $profile = auth()->user()->caregiverProfile;
+        $pesan = 'Profil berhasil diperbarui!';
+
         if ($profile) {
-            // Reset ke menunggu jika data penting berubah
             if ($profile->status_verifikasi === 'ditolak') {
                 $data['status_verifikasi'] = 'menunggu';
                 $data['alasan_penolakan'] = null;
+                $pesan = 'Data berhasil diperbaiki dan diajukan ulang untuk verifikasi admin.';
+            } elseif ($profile->status_verifikasi === 'menunggu') {
+                $pesan = 'Profil berhasil diperbarui! Menunggu verifikasi admin.';
             }
             $profile->update($data);
         } else {
             $data['user_id'] = auth()->id();
             $data['status_verifikasi'] = 'menunggu';
             CaregiverProfile::create($data);
+            $pesan = 'Profil berhasil disimpan! Menunggu verifikasi admin.';
         }
 
-        return back()->with('success', 'Profil berhasil diperbarui! Menunggu verifikasi admin.');
+        return back()->with('success', $pesan);
     }
 }

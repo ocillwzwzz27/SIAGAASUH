@@ -45,21 +45,21 @@
             </div>
 
             {{-- Tarif Layanan --}}
-            <div class="grid grid-cols-3 gap-3 pt-2">
-                <div class="bg-purple-50 rounded-2xl p-4 text-center border border-purple-100">
-                    <i class="fas fa-sun text-siaga text-xl mb-1"></i>
-                    <p class="text-[11px] text-gray-500 font-semibold uppercase">Harian</p>
-                    <p class="font-extrabold text-siaga text-sm mt-0.5">Rp {{ number_format($profile->tarif_harian ?? 150000, 0, ',', '.') }}</p>
+            <div class="grid grid-cols-3 gap-2 pt-2">
+                <div class="bg-purple-50 rounded-2xl p-3 text-center border border-purple-100">
+                    <i class="fas fa-sun text-siaga text-base mb-1"></i>
+                    <p class="text-[10px] text-gray-500 font-semibold uppercase">Harian</p>
+                    <p class="font-extrabold text-siaga text-xs mt-0.5">Rp {{ number_format($profile->tarif_harian ?? 150000, 0, ',', '.') }}</p>
                 </div>
-                <div class="bg-red-50 rounded-2xl p-4 text-center border border-red-100">
-                    <i class="fas fa-exclamation-triangle text-red-500 text-xl mb-1"></i>
-                    <p class="text-[11px] text-gray-500 font-semibold uppercase">Darurat</p>
-                    <p class="font-extrabold text-red-600 text-sm mt-0.5">Rp {{ number_format($profile->tarif_darurat ?? 200000, 0, ',', '.') }}</p>
+                <div class="bg-red-50 rounded-2xl p-3 text-center border border-red-100">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-base mb-1"></i>
+                    <p class="text-[10px] text-gray-500 font-semibold uppercase">Darurat</p>
+                    <p class="font-extrabold text-red-600 text-xs mt-0.5">Rp {{ number_format($profile->tarif_darurat ?? 200000, 0, ',', '.') }}</p>
                 </div>
-                <div class="bg-indigo-50 rounded-2xl p-4 text-center border border-indigo-100">
-                    <i class="fas fa-moon text-indigo-600 text-xl mb-1"></i>
-                    <p class="text-[11px] text-gray-500 font-semibold uppercase">Malam</p>
-                    <p class="font-extrabold text-indigo-700 text-sm mt-0.5">Rp {{ number_format($profile->tarif_malam ?? 180000, 0, ',', '.') }}</p>
+                <div class="bg-indigo-50 rounded-2xl p-3 text-center border border-indigo-100">
+                    <i class="fas fa-moon text-indigo-600 text-base mb-1"></i>
+                    <p class="text-[10px] text-gray-500 font-semibold uppercase">Malam</p>
+                    <p class="font-extrabold text-indigo-700 text-xs mt-0.5">Rp {{ number_format($profile->tarif_malam ?? 180000, 0, ',', '.') }}</p>
                 </div>
             </div>
 

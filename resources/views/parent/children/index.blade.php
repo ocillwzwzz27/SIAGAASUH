@@ -66,12 +66,12 @@
                         @if($ch->devices->isEmpty())
                             <div class="p-3 bg-yellow-50 rounded-xl border border-yellow-200">
                                 <p class="text-[11px] text-yellow-800 mb-2">Belum ada perangkat wearable yang ditautkan ke anak ini.</p>
-                                <form action="{{ route('parent.children.addDevice', $ch->id) }}" method="POST" class="flex gap-2">
+                                <form action="{{ route('parent.children.addDevice', $ch->id) }}" method="POST" class="flex flex-col gap-2">
                                     @csrf
-                                    <input type="text" name="nama_perangkat" placeholder="Nama Alat (Smartband)" required class="input text-xs py-1.5 flex-1">
-                                    <input type="text" name="device_code" placeholder="Kode Unik (WEARABLE-xxx)" required class="input text-xs py-1.5 flex-1 font-mono">
-                                    <button type="submit" class="btn-primary text-xs py-1.5 px-3 whitespace-nowrap">
-                                        Tautkan
+                                    <input type="text" name="nama_perangkat" placeholder="Nama Alat (contoh: Smartband)" required class="input text-xs py-2">
+                                    <input type="text" name="device_code" placeholder="Kode Unik (contoh: WEARABLE-002)" required class="input text-xs py-2 font-mono">
+                                    <button type="submit" class="btn-primary text-xs py-2 px-3 w-full">
+                                        <i class="fas fa-link mr-1"></i> Tautkan Perangkat
                                     </button>
                                 </form>
                             </div>
