@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/css/auth.css',
                 'resources/js/pages/auth/login.js',
                 'resources/js/pages/monitor.js',
+                'resources/js/pages/admin-caregiver-show.js',
             ],
             refresh: true,
         }),

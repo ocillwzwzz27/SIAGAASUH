@@ -1,4 +1,4 @@
-.auth-card--register { max-width: 440px; margin: 20px 0; }
+.auth-card--register { max-width: 480px; margin: 20px 0; }
 
 .role-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
 .role-option {
@@ -10,3 +10,48 @@
 .role-option__emoji { font-size: 1.3rem; margin-bottom: 4px; }
 .role-option__name { font-size: 0.78rem; font-weight: 700; color: #374151; }
 .role-option__hint { font-size: 0.65rem; color: #9ca3af; margin-top: 1px; }
+
+/* Bagian pendaftaran khusus Mitra Pengasuh */
+.mitra-section {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    margin-top: 4px;
+    padding-top: 14px;
+    border-top: 1.5px dashed #e9d5ff;
+}
+.mitra-section.is-hidden { display: none; }
+
+.mitra-badge {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-radius: 12px;
+    background: #faf5ff; border: 1px solid #e9d5ff;
+    font-size: 0.76rem; color: #5b1d92; font-weight: 600;
+    line-height: 1.4;
+}
+
+.file-input {
+    width: 100%; border: 1.5px dashed #d8b4fe; border-radius: 12px;
+    padding: 9px 12px; font-size: 0.78rem; background: #faf5ff;
+    color: #4b5563; cursor: pointer; font-family: var(--font-base);
+}
+.file-hint { display: block; margin-top: 4px; font-size: 0.68rem; color: #9ca3af; }
+
+.sk-box {
+    max-height: 165px; overflow-y: auto;
+    padding: 12px 14px; border-radius: 12px;
+    background: #f9fafb; border: 1.5px solid #e5e7eb;
+    font-size: 0.74rem; color: #4b5563; line-height: 1.55;
+}
+.sk-box h4 { margin: 0 0 6px; font-size: 0.78rem; font-weight: 700; color: #5b1d92; }
+.sk-box ol { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+
+.sk-agree {
+    display: flex; align-items: flex-start; gap: 9px;
+    margin-top: 8px; cursor: pointer;
+    font-size: 0.76rem; color: #374151; line-height: 1.45;
+}
+.sk-agree input {
+    width: 16px; height: 16px; margin-top: 2px;
+    accent-color: var(--siaga); flex-shrink: 0; cursor: pointer;
+}

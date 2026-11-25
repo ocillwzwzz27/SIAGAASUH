@@ -1,8 +1,8 @@
 @extends('layouts.caregiver')
 
 @section('title', 'Profil & Dokumen Pengasuh')
-@section('page-title', 'Profil & Dokumen KTP')
-@section('page-subtitle', 'Lengkapi data untuk verifikasi admin')
+@section('page-title', 'Profil & Dokumen Mitra')
+@section('page-subtitle', 'Kelengkapan berkas resmi PT SiagaAsuh')
 
 @section('content')
 <div class="space-y-4">
@@ -15,10 +15,38 @@
         <div class="flex items-center gap-2.5">
             <i class="fa-solid {{ $statusVerif === 'terverifikasi' ? 'fa-circle-check' : ($statusVerif === 'ditolak' ? 'fa-circle-exclamation' : 'fa-clock') }}"></i>
             <div>
-                <p class="text-xs font-bold">Status: {{ ucfirst($statusVerif) }}</p>
+                <p class="text-xs font-bold">Status Verifikasi: {{ ucfirst($statusVerif) }}</p>
                 @if($statusVerif === 'ditolak' && $profile->alasan_penolakan)
                     <p class="text-[11px] mt-0.5">{{ $profile->alasan_penolakan }}</p>
                 @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Tarif Layanan yang Ditetapkan oleh Admin PT (Read-Only) --}}
+    <div class="card p-4 border border-purple-100 bg-purple-50/40 space-y-2.5">
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-bold text-siaga uppercase">Tarif Layanan (Ditetapkan Admin PT)</p>
+            <span class="text-[10px] text-gray-500">Sesuai zona &amp; standar PT</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+            <div class="bg-white rounded-xl p-2.5 text-center border border-purple-100">
+                <p class="text-[10px] text-gray-400 font-semibold">Harian</p>
+                <p class="text-xs font-extrabold text-gray-800 mt-0.5">
+                    {{ $profile->tarif_harian ? 'Rp ' . number_format($profile->tarif_harian, 0, ',', '.') : 'Menunggu PT' }}
+                </p>
+            </div>
+            <div class="bg-white rounded-xl p-2.5 text-center border border-purple-100">
+                <p class="text-[10px] text-gray-400 font-semibold">Darurat</p>
+                <p class="text-xs font-extrabold text-gray-800 mt-0.5">
+                    {{ $profile->tarif_darurat ? 'Rp ' . number_format($profile->tarif_darurat, 0, ',', '.') : 'Menunggu PT' }}
+                </p>
+            </div>
+            <div class="bg-white rounded-xl p-2.5 text-center border border-purple-100">
+                <p class="text-[10px] text-gray-400 font-semibold">Malam</p>
+                <p class="text-xs font-extrabold text-gray-800 mt-0.5">
+                    {{ $profile->tarif_malam ? 'Rp ' . number_format($profile->tarif_malam, 0, ',', '.') : 'Menunggu PT' }}
+                </p>
             </div>
         </div>
     </div>
@@ -28,53 +56,69 @@
             @csrf
             @method('PUT')
 
-            {{-- NIK --}}
             <div>
-                <label class="label font-bold">Nomor Induk Kependudukan (NIK)</label>
+                <label class="label font-bold">Nomor Induk Kependudukan (NIK - 16 Digit)</label>
                 <input type="text" name="nik" value="{{ old('nik', $profile->nik) }}" required maxlength="16" placeholder="16 digit nomor KTP" class="input font-mono text-sm">
             </div>
 
-            {{-- Kompetensi --}}
+            <div>
+                <label class="label font-bold">Pendidikan Terakhir</label>
+                <select name="pendidikan_terakhir" required class="input text-sm">
+                    <option value="">-- Pilih Pendidikan Terakhir --</option>
+                    @foreach(['SMP / Sederajat', 'SMA / SMK', 'D3 Kebidanan / Keperawatan', 'S1 PAUD / Psikologi / Kesehatan', 'Lainnya'] as $pend)
+                        <option value="{{ $pend }}" @selected(old('pendidikan_terakhir', $profile->pendidikan_terakhir) === $pend)>{{ $pend }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="label font-bold">Kontak Darurat Keluarga</label>
+                <input type="text" name="kontak_darurat" value="{{ old('kontak_darurat', $profile->kontak_darurat) }}" required placeholder="Contoh: Ibu Siti / 08123456789" class="input text-sm">
+            </div>
+
+            <div>
+                <label class="label font-bold">Alamat Domisili Lengkap</label>
+                <textarea name="alamat_domisili" rows="2" required placeholder="Jalan, RT/RW, Desa/Kelurahan, Kecamatan, Kota..." class="input text-sm">{{ old('alamat_domisili', $profile->alamat_domisili) }}</textarea>
+            </div>
+
             <div>
                 <label class="label font-bold">Kompetensi &amp; Keahlian</label>
-                <textarea name="kompetensi" rows="3" required placeholder="Contoh: Sertifikasi pelatihan bayi, First Aid, stimulasi motorik anak..." class="input text-sm">{{ old('kompetensi', $profile->kompetensi) }}</textarea>
+                <textarea name="kompetensi" rows="3" required placeholder="Contoh: Perawatan bayi, First Aid, stimulasi motorik anak..." class="input text-sm">{{ old('kompetensi', $profile->kompetensi) }}</textarea>
             </div>
 
-            {{-- Pengalaman --}}
             <div>
-                <label class="label font-bold">Pengalaman Kerja</label>
-                <textarea name="pengalaman" rows="3" required placeholder="Contoh: 3 tahun merawat anak balita di daycare..." class="input text-sm">{{ old('pengalaman', $profile->pengalaman) }}</textarea>
+                <label class="label font-bold">Pengalaman Mengasuh &amp; Latar Belakang Hidup</label>
+                <textarea name="pengalaman" rows="3" required minlength="20" placeholder="Ceritakan pengalaman merawat anak & motivasi Anda..." class="input text-sm">{{ old('pengalaman', $profile->pengalaman) }}</textarea>
             </div>
 
-            {{-- Tarif Layanan (Stack nyaman untuk mobile 430px) --}}
-            <div class="space-y-3 pt-1">
-                <p class="text-xs font-bold text-gray-700 uppercase">Tarif Layanan (Rp)</p>
-                <div>
-                    <label class="label text-xs font-semibold">Tarif Harian</label>
-                    <input type="number" name="tarif_harian" value="{{ old('tarif_harian', $profile->tarif_harian) }}" placeholder="150000" class="input text-sm">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="label text-xs font-semibold">Tarif Darurat</label>
-                        <input type="number" name="tarif_darurat" value="{{ old('tarif_darurat', $profile->tarif_darurat) }}" placeholder="200000" class="input text-sm">
-                    </div>
-                    <div>
-                        <label class="label text-xs font-semibold">Tarif Malam</label>
-                        <input type="number" name="tarif_malam" value="{{ old('tarif_malam', $profile->tarif_malam) }}" placeholder="180000" class="input text-sm">
-                    </div>
-                </div>
-            </div>
+            {{-- Upload Berkas Wajib PT SiagaAsuh --}}
+            <div class="space-y-3 pt-2 border-t border-gray-100">
+                <p class="text-xs font-bold text-gray-700 uppercase">Dokumen Kelayakan Mitra (JPG/PNG/PDF, maks. 3MB)</p>
 
-            {{-- Upload Foto KTP --}}
-            <div>
-                <label class="label font-bold">Foto Kartu Identitas (KTP)</label>
-                <input type="file" name="foto_identitas" accept="image/*" class="input text-xs py-2">
-                @if($profile->foto_identitas)
-                    <div class="mt-2 p-2.5 bg-green-50 rounded-xl border border-green-100 text-xs text-green-700 flex items-center gap-2">
-                        <i class="fas fa-check-circle"></i>
-                        <span>KTP sudah terunggah. Unggah lagi jika ingin mengganti.</span>
+                @php
+                    $docs = [
+                        ['name' => 'foto_identitas', 'label' => '1. Foto KTP', 'val' => $profile->foto_identitas],
+                        ['name' => 'dokumen_skck', 'label' => '2. SKCK Aktif', 'val' => $profile->dokumen_skck],
+                        ['name' => 'dokumen_surat_sehat', 'label' => '3. Surat Keterangan Sehat', 'val' => $profile->dokumen_surat_sehat],
+                        ['name' => 'dokumen_surat_pengalaman', 'label' => '4. Surat Pengalaman / Sertifikat Mengasuh', 'val' => $profile->dokumen_surat_pengalaman],
+                    ];
+                @endphp
+
+                @foreach($docs as $doc)
+                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="text-xs font-bold text-gray-800">{{ $doc['label'] }}</label>
+                            @if($doc['val'])
+                                <a href="{{ asset('storage/' . $doc['val']) }}" target="_blank" class="text-[11px] font-semibold text-green-700 hover:underline">
+                                    <i class="fas fa-check-circle"></i> Lihat Berkas
+                                </a>
+                            @else
+                                <span class="text-[10px] font-bold text-red-600">Belum diunggah</span>
+                            @endif
+                        </div>
+                        <input type="file" name="{{ $doc['name'] }}" accept=".jpg,.jpeg,.png,.pdf" class="input text-xs py-1.5 bg-white" {{ $doc['val'] ? '' : 'required' }}>
                     </div>
-                @endif
+                @endforeach
             </div>
 
             <div class="pt-2">

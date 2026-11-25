@@ -16,43 +16,59 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        $profile = auth()->user()->caregiverProfile;
+
         $request->validate([
-            'nik' => 'required|string|size:16',
-            'kompetensi' => 'required|string',
-            'pengalaman' => 'required|string',
-            'tarif_harian' => 'nullable|numeric|min:0',
-            'tarif_darurat' => 'nullable|numeric|min:0',
-            'tarif_malam' => 'nullable|numeric|min:0',
-            'foto_identitas' => 'nullable|image|max:2048',
-            'foto_profil' => 'nullable|image|max:2048',
+            'nik' => 'required|digits:16',
+            'alamat_domisili' => 'required|string|max:500',
+            'pendidikan_terakhir' => 'required|string|max:100',
+            'kontak_darurat' => 'required|string|max:150',
+            'kompetensi' => 'required|string|max:1000',
+            'pengalaman' => 'required|string|min:20|max:2000',
+            'foto_identitas' => ($profile && $profile->foto_identitas ? 'nullable' : 'required') . '|file|mimes:jpg,jpeg,png,pdf|max:3072',
+            'dokumen_skck' => ($profile && $profile->dokumen_skck ? 'nullable' : 'required') . '|file|mimes:jpg,jpeg,png,pdf|max:3072',
+            'dokumen_surat_sehat' => ($profile && $profile->dokumen_surat_sehat ? 'nullable' : 'required') . '|file|mimes:jpg,jpeg,png,pdf|max:3072',
+            'dokumen_surat_pengalaman' => ($profile && $profile->dokumen_surat_pengalaman ? 'nullable' : 'required') . '|file|mimes:jpg,jpeg,png,pdf|max:3072',
         ]);
 
-        $data = $request->only(['nik', 'kompetensi', 'pengalaman', 'tarif_harian', 'tarif_darurat', 'tarif_malam']);
+        $data = $request->only([
+            'nik',
+            'alamat_domisili',
+            'pendidikan_terakhir',
+            'kontak_darurat',
+            'kompetensi',
+            'pengalaman',
+        ]);
 
         if ($request->hasFile('foto_identitas')) {
             $data['foto_identitas'] = $request->file('foto_identitas')->store('identitas', 'public');
         }
-        if ($request->hasFile('foto_profil')) {
-            $data['foto_profil'] = $request->file('foto_profil')->store('profil', 'public');
+        if ($request->hasFile('dokumen_skck')) {
+            $data['dokumen_skck'] = $request->file('dokumen_skck')->store('skck', 'public');
+        }
+        if ($request->hasFile('dokumen_surat_sehat')) {
+            $data['dokumen_surat_sehat'] = $request->file('dokumen_surat_sehat')->store('surat-sehat', 'public');
+        }
+        if ($request->hasFile('dokumen_surat_pengalaman')) {
+            $data['dokumen_surat_pengalaman'] = $request->file('dokumen_surat_pengalaman')->store('surat-pengalaman', 'public');
         }
 
-        $profile = auth()->user()->caregiverProfile;
-        $pesan = 'Profil berhasil diperbarui!';
+        $pesan = 'Profil & berkas berhasil diperbarui!';
 
         if ($profile) {
             if ($profile->status_verifikasi === 'ditolak') {
                 $data['status_verifikasi'] = 'menunggu';
                 $data['alasan_penolakan'] = null;
-                $pesan = 'Data berhasil diperbaiki dan diajukan ulang untuk verifikasi admin.';
+                $pesan = 'Berkas berhasil diperbaiki dan diajukan ulang untuk verifikasi admin PT.';
             } elseif ($profile->status_verifikasi === 'menunggu') {
-                $pesan = 'Profil berhasil diperbarui! Menunggu verifikasi admin.';
+                $pesan = 'Profil & berkas berhasil diperbarui! Menunggu verifikasi admin PT.';
             }
             $profile->update($data);
         } else {
             $data['user_id'] = auth()->id();
             $data['status_verifikasi'] = 'menunggu';
             CaregiverProfile::create($data);
-            $pesan = 'Profil berhasil disimpan! Menunggu verifikasi admin.';
+            $pesan = 'Profil & berkas berhasil disimpan! Menunggu verifikasi admin PT.';
         }
 
         return back()->with('success', $pesan);

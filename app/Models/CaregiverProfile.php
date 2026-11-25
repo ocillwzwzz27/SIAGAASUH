@@ -12,10 +12,18 @@ class CaregiverProfile extends Model
     protected $fillable = [
         'user_id',
         'nik',
+        'alamat_domisili',
+        'pendidikan_terakhir',
+        'kontak_darurat',
         'foto_identitas',
         'foto_profil',
+        'dokumen_skck',
+        'dokumen_surat_sehat',
+        'dokumen_surat_pengalaman',
         'kompetensi',
         'pengalaman',
+        'setuju_sk',
+        'sk_accepted_at',
         'status_verifikasi',
         'alasan_penolakan',
         'verified_by',
@@ -28,6 +36,8 @@ class CaregiverProfile extends Model
     ];
 
     protected $casts = [
+        'setuju_sk' => 'boolean',
+        'sk_accepted_at' => 'datetime',
         'verified_at' => 'datetime',
         'tarif_harian' => 'decimal:2',
         'tarif_darurat' => 'decimal:2',
