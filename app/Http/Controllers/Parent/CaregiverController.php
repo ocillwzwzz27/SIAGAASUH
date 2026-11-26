@@ -55,6 +55,13 @@ class CaregiverController extends Controller
             abort(404);
         }
 
-        return view('parent.caregivers.show', compact('profile'));
+        $reviews = \App\Models\CareSession::with('parent')
+            ->where('caregiver_id', $profile->user_id)
+            ->whereNotNull('rating')
+            ->latest('ended_at')
+            ->take(5)
+            ->get();
+
+        return view('parent.caregivers.show', compact('profile', 'reviews'));
     }
 }

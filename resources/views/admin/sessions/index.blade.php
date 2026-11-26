@@ -14,6 +14,7 @@
                     <th class="py-3.5 px-4">Anak & Ortu</th>
                     <th class="py-3.5 px-4">Pengasuh</th>
                     <th class="py-3.5 px-4">Layanan</th>
+                    <th class="py-3.5 px-4">Pembayaran</th>
                     <th class="py-3.5 px-4">Status</th>
                     <th class="py-3.5 px-4">Sensor Terakhir</th>
                     <th class="py-3.5 px-4 text-center">Detail</th>
@@ -35,6 +36,14 @@
                         </td>
                         <td class="py-4 px-4 text-xs uppercase font-medium text-purple-700">
                             {{ $s->jenis_layanan }}
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full {{ $s->status_pembayaran === 'lunas' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                                {{ $s->status_pembayaran === 'lunas' ? 'Lunas' : 'Belum Bayar' }}
+                            </span>
+                            @if($s->total_biaya)
+                                <div class="text-[11px] text-gray-500 mt-0.5">Rp {{ number_format((float) $s->total_biaya, 0, ',', '.') }}</div>
+                            @endif
                         </td>
                         <td class="py-4 px-4">
                             <span class="text-xs font-semibold px-2.5 py-1 rounded-full
@@ -69,7 +78,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="py-8 text-center text-gray-400">Belum ada sesi pengasuhan terdaftar.</td>
+                        <td colspan="8" class="py-8 text-center text-gray-400">Belum ada sesi pengasuhan terdaftar.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -51,8 +51,16 @@
                 </div>
 
                 <div class="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
-                    <span class="uppercase font-semibold text-purple-700">{{ $s->jenis_layanan }}</span>
-                    <span>{{ $s->created_at->format('d M Y, H:i') }}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="uppercase font-semibold text-purple-700">{{ $s->jenis_layanan }}</span>
+                        @if($s->total_biaya)
+                            <span>&middot;</span>
+                            <span class="font-bold text-gray-700">Rp {{ number_format((float) $s->total_biaya, 0, ',', '.') }}</span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $s->status_pembayaran === 'lunas' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                        {{ $s->status_pembayaran === 'lunas' ? 'Lunas' : 'Belum Bayar' }}
+                    </span>
                 </div>
 
                 @if($s->child->catatan_kesehatan)

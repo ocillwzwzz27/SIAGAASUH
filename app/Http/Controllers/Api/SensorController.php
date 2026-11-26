@@ -83,7 +83,7 @@ class SensorController extends Controller
         if ($reading->bpm < 60) $alerts[] = "BPM rendah ({$reading->bpm} bpm)";
         if ($reading->bpm > 140) $alerts[] = "BPM tinggi ({$reading->bpm} bpm)";
         if ($reading->spo2 !== null && $reading->spo2 < 95) $alerts[] = "SpO2 rendah ({$reading->spo2}%)";
-        if ($reading->reed_status) $alerts[] = "Perangkat dilepas dari anak!";
+        if ($reading->reed_status) $alerts[] = "Sensor pintu terdeteksi terbuka / dilewati!";
 
         return 'Terdeteksi kondisi tidak normal: ' . implode(', ', $alerts) . '. Segera periksa kondisi anak Anda.';
     }

@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="space-y-4">
-    <div class="card p-4 border border-purple-100">
+    <div class="bg-white rounded-3xl p-4 border border-purple-100 shadow-xs">
         <form action="{{ route('parent.children.update', $child->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             @method('PUT')

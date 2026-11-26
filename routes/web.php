@@ -63,6 +63,8 @@ Route::middleware(['auth', 'role:orang_tua'])->prefix('parent')->name('parent.')
     Route::post('/sessions', [ParentCtrl\SessionController::class, 'store'])->name('sessions.store');
     Route::get('/sessions/{id}', [ParentCtrl\SessionController::class, 'show'])->name('sessions.show');
     Route::post('/sessions/{id}/cancel', [ParentCtrl\SessionController::class, 'cancel'])->name('sessions.cancel');
+    Route::post('/sessions/{id}/rate', [ParentCtrl\SessionController::class, 'rate'])->name('sessions.rate');
+    Route::post('/sessions/{id}/pay', [ParentCtrl\PaymentController::class, 'pay'])->name('sessions.pay');
     Route::get('/sessions/{id}/monitor', [ParentCtrl\SessionController::class, 'monitor'])->name('sessions.monitor');
     Route::get('/sessions/{id}/sensor', [ParentCtrl\SessionController::class, 'latestSensor'])->name('sessions.sensor');
 

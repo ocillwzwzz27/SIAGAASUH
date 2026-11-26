@@ -38,6 +38,12 @@
             </span>
             <p class="text-xs text-gray-500 mt-2">Mulai: {{ $session->started_at ? $session->started_at->format('d M Y H:i') : '-' }}</p>
             <p class="text-xs text-gray-500">Selesai: {{ $session->ended_at ? $session->ended_at->format('d M Y H:i') : '-' }}</p>
+            <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
+                <span class="font-bold text-gray-700">Rp {{ number_format((float) ($session->total_biaya ?? 0), 0, ',', '.') }}</span>
+                <span class="px-2 py-0.5 rounded-full font-bold text-[10px] {{ $session->status_pembayaran === 'lunas' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                    {{ $session->status_pembayaran === 'lunas' ? 'LUNAS' : 'BELUM BAYAR' }}
+                </span>
+            </div>
         </div>
     </div>
 
@@ -66,7 +72,7 @@
                         <th class="py-2.5 px-3">Waktu Rekam</th>
                         <th class="py-2.5 px-3">BPM (Detak Jantung)</th>
                         <th class="py-2.5 px-3">SpO2 (Kadar Oksigen)</th>
-                        <th class="py-2.5 px-3">Status Reed Switch</th>
+                        <th class="py-2.5 px-3">Status Sensor Pintu</th>
                         <th class="py-2.5 px-3">Kondisi</th>
                     </tr>
                 </thead>
@@ -78,9 +84,9 @@
                             <td class="py-2.5 px-3">{{ $r->spo2 ? $r->spo2 . '%' : '-' }}</td>
                             <td class="py-2.5 px-3">
                                 @if($r->reed_status)
-                                    <span class="text-red-600 font-bold font-sans">⚠️ Terlepas/Terbuka</span>
+                                    <span class="text-red-600 font-bold font-sans">🚨 Pintu Terbuka / Terlewati</span>
                                 @else
-                                    <span class="text-green-600 font-sans">✓ Terpasang Aman</span>
+                                    <span class="text-green-600 font-sans">✓ Pintu Aman</span>
                                 @endif
                             </td>
                             <td class="py-2.5 px-3 font-sans">

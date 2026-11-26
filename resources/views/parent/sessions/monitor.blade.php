@@ -109,18 +109,18 @@
             <div class="sensor-note">Normal: 60–140 BPM</div>
         </div>
 
-        {{-- Status Perangkat (Reed Switch) --}}
+        {{-- Sensor Pintu (Reed Switch) --}}
         <div class="sensor-card sensor-card--device" id="reedCard">
-            <div class="sensor-icon sensor-icon--device"><i class="fas fa-shield-alt"></i></div>
-            <p class="sensor-label">Status Perangkat</p>
+            <div class="sensor-icon sensor-icon--device"><i class="fas fa-door-closed"></i></div>
+            <p class="sensor-label">Sensor Pintu</p>
             <div class="sensor-device-value text-sm sm:text-base" id="reedValue">
                 @if($reading)
-                    {{ $reading->reed_status ? '⚠️ TERLEPAS' : '✅ TERPASANG' }}
+                    {{ $reading->reed_status ? '🚨 PINTU TERBUKA' : '🚪 PINTU AMAN' }}
                 @else
-                    ✅ TERPASANG
+                    🚪 PINTU AMAN
                 @endif
             </div>
-            <p class="sensor-sub">Sensor pengaman gelang</p>
+            <p class="sensor-sub">Deteksi batas pintu / akses</p>
             <div class="sensor-note" id="updatedAt">
                 Update: {{ $reading ? $reading->recorded_at->diffForHumans() : 'baru saja' }}
             </div>
@@ -315,7 +315,7 @@
                         <tr>
                             <th>Waktu</th>
                             <th>BPM</th>
-                            <th>Perangkat</th>
+                            <th>Sensor Pintu</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -327,9 +327,9 @@
                                 <td class="{{ ($r->bpm < 60 || $r->bpm > 140) ? 'is-bad' : 'is-ok' }}">{{ $r->bpm }}</td>
                                 <td>
                                     @if($r->reed_status)
-                                        <span class="reed-state is-bad">⚠️ Lepas</span>
+                                        <span class="reed-state is-bad">🚨 Terbuka</span>
                                     @else
-                                        <span class="reed-state is-ok">✅ Pasang</span>
+                                        <span class="reed-state is-ok">🚪 Aman</span>
                                     @endif
                                 </td>
                                 <td>
@@ -366,7 +366,7 @@
                     $presets = [
                         ['class' => 'ok',     'icon' => 'fa-heart',                'label' => 'Normal (85 BPM + GPS)',      'bpm' => 85,  'spo2' => 98, 'reed' => false, 'lat' => -6.77452, 'lng' => 110.84152, 'loc' => 'GondangManis, Kudus'],
                         ['class' => 'danger', 'icon' => 'fa-exclamation-triangle', 'label' => 'BPM Tinggi (152 BPM)',       'bpm' => 152, 'spo2' => 97, 'reed' => false, 'lat' => -6.77510, 'lng' => 110.84210, 'loc' => 'Taman Kota Kudus'],
-                        ['class' => 'device', 'icon' => 'fa-magnet',               'label' => 'Gelang Terlepas',            'bpm' => 90,  'spo2' => 98, 'reed' => true,  'lat' => -6.77390, 'lng' => 110.84080, 'loc' => 'Area Rumah Anak'],
+                        ['class' => 'device', 'icon' => 'fa-door-open',            'label' => 'Pintu Terlewati / Terbuka',  'bpm' => 90,  'spo2' => 98, 'reed' => true,  'lat' => -6.77390, 'lng' => 110.84080, 'loc' => 'Area Rumah Anak'],
                     ];
                 @endphp
                 <div class="simulator__actions">

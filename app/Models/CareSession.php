@@ -20,12 +20,21 @@ class CareSession extends Model
         'ringkasan',
         'catatan_orang_tua',
         'rating',
+        'ulasan',
+        'order_id',
+        'total_biaya',
+        'status_pembayaran',
+        'metode_pembayaran',
+        'snap_token',
+        'paid_at',
     ];
 
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
+        'paid_at' => 'datetime',
         'rating' => 'decimal:2',
+        'total_biaya' => 'decimal:2',
     ];
 
     public function parent()
@@ -76,5 +85,52 @@ class CareSession extends Model
     public function isPending(): bool
     {
         return $this->status === 'menunggu';
+    }
+
+    public function markAsPaid(?string $paymentType = null): void
+    {
+        $wasPaid = $this->status_pembayaran === 'lunas';
+
+        $this->update([
+            'status_pembayaran' => 'lunas',
+            'metode_pembayaran' => $paymentType ?? $this->metode_pembayaran ?? 'midtrans',
+            'paid_at' => $this->paid_at ?? now(),
+        ]);
+
+        if ($wasPaid) {
+            return;
+        }
+
+        $nominal = 'Rp ' . number_format((float) ($this->total_biaya ?? 0), 0, ',', '.');
+
+        // 1. Notifikasi ke Orang Tua
+        AppNotification::kirim(
+            $this->parent_id,
+            '💳 Pembayaran Sesi Lunas',
+            "Pembayaran untuk sesi #{$this->id} sebesar {$nominal} telah berhasil dikonfirmasi.",
+            'layanan',
+            $this->id
+        );
+
+        // 2. Notifikasi ke Mitra Pengasuh
+        AppNotification::kirim(
+            $this->caregiver_id,
+            '💰 Pembayaran Sesi Diterima',
+            ($this->parent->name ?? 'Orang Tua') . " telah melunasi biaya layanan sesi #{$this->id} sebesar {$nominal}.",
+            'layanan',
+            $this->id
+        );
+
+        // 3. Notifikasi ke Semua Admin PT
+        $admins = User::where('role', 'admin')->pluck('id');
+        foreach ($admins as $adminId) {
+            AppNotification::kirim(
+                $adminId,
+                '🧾 Pembayaran Masuk Lunas',
+                "Transaksi sesi #{$this->id} ({$this->order_id}) sebesar {$nominal} telah lunas.",
+                'layanan',
+                $this->id
+            );
+        }
     }
 }

@@ -34,7 +34,8 @@ class SessionController extends Controller
         ]);
 
         // Pastikan pengasuh valid & sudah terverifikasi
-        $caregiver = User::where('role', 'pengasuh')
+        $caregiver = User::with('caregiverProfile')
+            ->where('role', 'pengasuh')
             ->whereHas('caregiverProfile', fn ($q) => $q->where('status_verifikasi', 'terverifikasi'))
             ->find($request->caregiver_id);
 
@@ -53,6 +54,13 @@ class SessionController extends Controller
             return back()->with('error', 'Anda masih memiliki sesi yang aktif atau menunggu konfirmasi.');
         }
 
+        $profile = $caregiver->caregiverProfile;
+        $totalBiaya = match ($request->jenis_layanan) {
+            'darurat' => $profile?->tarif_darurat ?? 200000,
+            'malam' => $profile?->tarif_malam ?? 180000,
+            default => $profile?->tarif_harian ?? 150000,
+        };
+
         $session = CareSession::create([
             'parent_id' => auth()->id(),
             'caregiver_id' => $caregiver->id,
@@ -60,7 +68,11 @@ class SessionController extends Controller
             'jenis_layanan' => $request->jenis_layanan,
             'catatan_orang_tua' => $request->catatan_orang_tua,
             'status' => 'menunggu',
+            'total_biaya' => $totalBiaya,
+            'status_pembayaran' => 'belum_bayar',
         ]);
+
+        $session->update(['order_id' => 'SGA-' . $session->id . '-' . time()]);
 
         // Notifikasi ke pengasuh
         AppNotification::kirim(
@@ -78,7 +90,7 @@ class SessionController extends Controller
     public function show($id)
     {
         $session = CareSession::with([
-            'caregiver.caregiverProfile', 'child',
+            'caregiver.caregiverProfile', 'child', 'checkins',
             'sensorReadings' => fn ($q) => $q->latest()->take(20),
         ])->where('parent_id', auth()->id())->findOrFail($id);
 
@@ -112,6 +124,51 @@ class SessionController extends Controller
         );
 
         return back()->with('success', 'Sesi berhasil dibatalkan.');
+    }
+
+    public function rate(Request $request, $id)
+    {
+        $session = CareSession::with('caregiver.caregiverProfile')
+            ->where('parent_id', auth()->id())
+            ->where('status', 'selesai')
+            ->findOrFail($id);
+
+        if ($session->rating !== null) {
+            return back()->with('error', 'Anda sudah memberikan penilaian untuk sesi ini.');
+        }
+
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'ulasan' => 'nullable|string|max:500',
+        ]);
+
+        $session->update([
+            'rating' => $request->rating,
+            'ulasan' => $request->ulasan,
+        ]);
+
+        // Hitung ulang rata-rata rating & total ulasan pada profil mitra pengasuh
+        $stats = CareSession::where('caregiver_id', $session->caregiver_id)
+            ->whereNotNull('rating')
+            ->selectRaw('AVG(rating) as avg_rating, COUNT(*) as total')
+            ->first();
+
+        if ($session->caregiver?->caregiverProfile) {
+            $session->caregiver->caregiverProfile->update([
+                'rating' => round((float) ($stats->avg_rating ?? $request->rating), 2),
+                'total_ulasan' => (int) ($stats->total ?? 1),
+            ]);
+        }
+
+        AppNotification::kirim(
+            $session->caregiver_id,
+            '⭐ Penilaian Baru dari Orang Tua',
+            auth()->user()->name . " memberi rating {$request->rating}/5 untuk sesi pengasuhan." . ($request->ulasan ? ' Ulasan: "' . $request->ulasan . '"' : ''),
+            'layanan',
+            $session->id
+        );
+
+        return back()->with('success', 'Terima kasih! Rating dan ulasan Anda berhasil disimpan.');
     }
 
     public function monitor($id)

@@ -99,6 +99,28 @@
                 </div>
             </div>
 
+            {{-- Ulasan Orang Tua --}}
+            @if(isset($reviews) && $reviews->isNotEmpty())
+                <div class="space-y-2.5 pt-2 border-t border-gray-100">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Ulasan Orang Tua</h4>
+                    <div class="space-y-2">
+                        @foreach($reviews as $rev)
+                            <div class="p-3 bg-purple-50/40 rounded-xl border border-purple-100 space-y-1">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-bold text-gray-800">{{ $rev->parent->name }}</span>
+                                    <span class="text-amber-500 font-bold">
+                                        ★ {{ number_format($rev->rating, 1) }}
+                                    </span>
+                                </div>
+                                @if($rev->ulasan)
+                                    <p class="text-xs text-gray-600 leading-relaxed">"{{ $rev->ulasan }}"</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             {{-- Tombol Pesan --}}
             <div class="pt-4 border-t border-gray-100 flex gap-3">
                 <a href="{{ route('parent.sessions.create', ['caregiver_id' => $profile->user_id]) }}"

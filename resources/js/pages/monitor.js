@@ -62,7 +62,7 @@ if (root) {
         }
 
         if (data.reed_status !== undefined && el.reedValue && el.reedCard) {
-            el.reedValue.textContent = data.reed_status ? '⚠️ TERLEPAS' : '✅ TERPASANG';
+            el.reedValue.textContent = data.reed_status ? '🚨 PINTU TERBUKA' : '🚪 PINTU AMAN';
             el.reedValue.classList.toggle('is-alert', Boolean(data.reed_status));
             el.reedCard.classList.toggle('is-alert', Boolean(data.reed_status));
         }
@@ -141,7 +141,7 @@ if (root) {
 
         const messages = [];
         if (bpmCritical) messages.push(`BPM ${data.bpm} (${data.bpm > BPM_MAX ? 'TERLALU TINGGI' : 'TERLALU RENDAH'})`);
-        if (reedCritical) messages.push('Perangkat TERLEPAS dari anak!');
+        if (reedCritical) messages.push('Sensor pintu terdeteksi TERBUKA / TERLEWATI!');
 
         el.alertDesc.textContent = `${messages.join(' | ')} — Segera hubungi pengasuh!`;
         el.alertBox.classList.add('is-visible');
