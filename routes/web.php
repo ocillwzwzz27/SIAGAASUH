@@ -83,6 +83,7 @@ Route::middleware(['auth', 'role:pengasuh'])->prefix('caregiver')->name('caregiv
     // Sessions
     Route::get('/sessions', [Caregiver\SessionController::class, 'index'])->name('sessions.index');
     Route::post('/sessions/{id}/confirm', [Caregiver\SessionController::class, 'confirm'])->name('sessions.confirm');
+    Route::post('/sessions/{id}/checkin', [Caregiver\SessionController::class, 'checkin'])->name('sessions.checkin');
     Route::post('/sessions/{id}/end', [Caregiver\SessionController::class, 'end'])->name('sessions.end');
 
     // Notifications

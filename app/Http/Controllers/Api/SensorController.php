@@ -19,6 +19,9 @@ class SensorController extends Controller
             'bpm' => 'required|integer|min:0|max:300',
             'spo2' => 'nullable|integer|min:0|max:100',
             'reed_status' => 'required|boolean',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'location_name' => 'nullable|string|max:150',
         ]);
 
         // Validasi device
@@ -47,6 +50,9 @@ class SensorController extends Controller
             'bpm' => $request->bpm,
             'spo2' => $request->spo2,
             'reed_status' => $request->reed_status,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'location_name' => $request->location_name,
             'recorded_at' => now(),
         ]);
 

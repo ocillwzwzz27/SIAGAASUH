@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Caregiver;
 
 use App\Http\Controllers\Controller;
 use App\Models\CareSession;
+use App\Models\SessionCheckin;
 use App\Models\AppNotification;
 use Illuminate\Http\Request;
 
@@ -104,5 +105,38 @@ class SessionController extends Controller
 
         return redirect()->route('caregiver.sessions.index')
             ->with('success', 'Sesi berhasil diakhiri. Terima kasih!');
+    }
+
+    public function checkin(Request $request, $id)
+    {
+        $session = CareSession::with('child')
+            ->where('caregiver_id', auth()->id())
+            ->where('status', 'berjalan')
+            ->findOrFail($id);
+
+        $request->validate([
+            'foto' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'catatan' => 'nullable|string|max:300',
+        ]);
+
+        $path = $request->file('foto')->store('checkins', 'public');
+
+        SessionCheckin::create([
+            'session_id' => $session->id,
+            'caregiver_id' => auth()->id(),
+            'foto_path' => $path,
+            'catatan' => $request->catatan,
+            'checked_in_at' => now(),
+        ]);
+
+        AppNotification::kirim(
+            $session->parent_id,
+            '📸 Foto Kondisi Anak Terbaru',
+            auth()->user()->name . ' baru saja mengirimkan foto kondisi ' . $session->child->nama . ($request->catatan ? ': "' . $request->catatan . '"' : '.'),
+            'layanan',
+            $session->id
+        );
+
+        return back()->with('success', 'Foto verifikasi kondisi anak berhasil dikirim ke orang tua!');
     }
 }

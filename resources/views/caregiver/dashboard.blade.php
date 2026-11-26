@@ -128,6 +128,57 @@
                 @endif
             </div>
 
+            {{-- Check-In Foto Kondisi Anak Tiap 1 Jam --}}
+            @php
+                $lastCheckin = $sesi_aktif->latestCheckin;
+                $refTime = $lastCheckin?->checked_in_at ?? $sesi_aktif->started_at ?? now();
+                $minutesElapsed = (int) $refTime->diffInMinutes(now());
+                $isDue = $minutesElapsed >= 60;
+            @endphp
+            <div class="p-3 bg-white rounded-2xl border {{ $isDue ? 'border-amber-300 bg-amber-50/40' : 'border-purple-100' }} space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-camera text-siaga"></i> Verifikasi Foto Anak (1 Jam)
+                    </span>
+                    @if($isDue)
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            Waktunya Check-In!
+                        </span>
+                    @elseif($lastCheckin)
+                        <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            {{ $lastCheckin->checked_in_at->diffForHumans() }}
+                        </span>
+                    @else
+                        <span class="bg-purple-100 text-siaga text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            {{ max(0, 60 - $minutesElapsed) }} mnt lagi
+                        </span>
+                    @endif
+                </div>
+
+                <form action="{{ route('caregiver.sessions.checkin', $sesi_aktif->id) }}" method="POST" enctype="multipart/form-data" class="space-y-2">
+                    @csrf
+                    <input type="file" name="foto" accept="image/*" capture="environment" required
+                        class="input text-xs py-1.5 bg-gray-50">
+                    <input type="text" name="catatan" maxlength="300"
+                        placeholder="Aktivitas anak saat ini (opsional, misal: Sedang makan siang)"
+                        class="input text-xs py-2">
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 rounded-xl transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Kirim Foto Kondisi Anak
+                    </button>
+                </form>
+
+                @if($sesi_aktif->checkins->count() > 0)
+                    <div class="pt-1.5 border-t border-gray-100 flex items-center gap-2 overflow-x-auto">
+                        @foreach($sesi_aktif->checkins->take(4) as $ci)
+                            <a href="{{ asset('storage/' . $ci->foto_path) }}" target="_blank" class="flex-shrink-0 text-center">
+                                <img src="{{ asset('storage/' . $ci->foto_path) }}" alt="Check-in" class="w-12 h-12 rounded-lg object-cover border border-purple-100">
+                                <span class="text-[9px] text-gray-500 block mt-0.5">{{ $ci->checked_in_at->format('H:i') }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
             <form action="{{ route('caregiver.sessions.end', $sesi_aktif->id) }}" method="POST" class="space-y-2.5 pt-2 border-t border-purple-100">
                 @csrf
                 <label class="label text-[11px] font-bold text-gray-700 uppercase">

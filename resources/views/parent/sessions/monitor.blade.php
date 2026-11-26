@@ -13,8 +13,25 @@
     $reading = $session->latestReading;
     $dev = $session->child->activeDevice;
     $readings = $session->sensorReadings()->latest()->take(5)->get();
+    $checkins = $session->checkins;
+    $lastCheckin = $session->latestCheckin;
     $cg = $session->caregiver;
     $cgProfile = $cg->caregiverProfile;
+
+    $hasCoords = $reading && $reading->latitude !== null && $reading->longitude !== null;
+    $lat = $hasCoords ? $reading->latitude : null;
+    $lng = $hasCoords ? $reading->longitude : null;
+    $mapEmbedUrl = $hasCoords
+        ? sprintf(
+            'https://www.openstreetmap.org/export/embed.html?bbox=%f,%f,%f,%f&layer=mapnik&marker=%f,%f',
+            $lng - 0.004, $lat - 0.004, $lng + 0.004, $lat + 0.004, $lat, $lng
+        )
+        : '';
+    $gmapsUrl = $hasCoords ? "https://www.google.com/maps?q={$lat},{$lng}" : '#';
+
+    $refTime = $lastCheckin?->checked_in_at ?? $session->started_at ?? now();
+    $checkinMinutes = (int) $refTime->diffInMinutes(now());
+    $isCheckinOverdue = $checkinMinutes >= 60;
 
     // Format nomor WA (08xxx -> 628xxx)
     $rawPhone = preg_replace('/[^0-9]/', '', $cg->phone ?? '');
@@ -107,6 +124,99 @@
             <div class="sensor-note" id="updatedAt">
                 Update: {{ $reading ? $reading->recorded_at->diffForHumans() : 'baru saja' }}
             </div>
+        </div>
+    </div>
+
+    {{-- 3B. Live Lokasi Anak (GPS dari Wearable IoT) --}}
+    <div class="card p-4 border border-purple-100 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-purple-100 text-siaga flex items-center justify-center text-sm">
+                    <i class="fas fa-map-marker-alt"></i>
+                </span>
+                <div>
+                    <h4 class="text-xs font-bold text-gray-900">Live Lokasi Anak (GPS IoT)</h4>
+                    <p class="text-[11px] text-gray-500" id="locationNameText">
+                        {{ $reading?->location_name ?? ($hasCoords ? 'Titik lokasi perangkat aktif' : 'Menunggu sinyal GPS perangkat...') }}
+                    </p>
+                </div>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full {{ $hasCoords ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}" id="locationStatusBadge">
+                {{ $hasCoords ? 'GPS Aktif' : 'Menunggu' }}
+            </span>
+        </div>
+
+        <div class="rounded-2xl overflow-hidden border border-purple-100 bg-gray-50 relative {{ $hasCoords ? '' : 'hidden' }}" id="locationMapWrap">
+            <iframe id="locationMapFrame"
+                    src="{{ $mapEmbedUrl }}"
+                    class="w-full h-44 border-0"
+                    loading="lazy"
+                    title="Peta Lokasi Anak"></iframe>
+        </div>
+
+        <div id="locationEmptyBox" class="p-4 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center text-xs text-gray-500 {{ $hasCoords ? 'hidden' : '' }}">
+            <i class="fas fa-satellite-dish text-purple-300 text-lg mb-1 block"></i>
+            Belum ada koordinat GPS yang dikirim oleh perangkat wearable.
+        </div>
+
+        <div class="flex items-center justify-between gap-2 pt-1">
+            <span class="text-[11px] font-mono text-gray-500 truncate" id="locationCoords">
+                {{ $hasCoords ? number_format($lat, 5) . ', ' . number_format($lng, 5) : 'Koordinat: --' }}
+            </span>
+            <a id="locationGmapsBtn"
+               href="{{ $gmapsUrl }}"
+               target="_blank"
+               class="btn-primary text-[11px] py-1.5 px-3 rounded-xl flex-shrink-0 inline-flex items-center gap-1.5 {{ $hasCoords ? '' : 'pointer-events-none opacity-50' }}">
+                <i class="fas fa-location-arrow"></i> Buka Google Maps
+            </a>
+        </div>
+    </div>
+
+    {{-- 3C. Timeline Verifikasi Foto Kondisi Anak (Tiap 1 Jam) --}}
+    <div class="card p-4 border border-purple-100 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+            <div>
+                <h4 class="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                    <i class="fas fa-camera text-siaga"></i> Foto Kondisi Anak (Tiap 1 Jam)
+                </h4>
+                <p class="text-[11px] text-gray-500 mt-0.5">Verifikasi berkala dari pengasuh</p>
+            </div>
+            <span id="checkinStatusBadge" class="text-[10px] font-bold px-2.5 py-1 rounded-full {{ $isCheckinOverdue ? 'bg-amber-100 text-amber-800' : ($lastCheckin ? 'bg-green-100 text-green-700' : 'bg-purple-50 text-siaga') }}">
+                @if($lastCheckin)
+                    {{ $isCheckinOverdue ? 'Perlu Update Baru' : 'Terupdate ' . $lastCheckin->checked_in_at->diffForHumans() }}
+                @else
+                    {{ $isCheckinOverdue ? 'Menunggu Foto Pertama' : 'Aktif' }}
+                @endif
+            </span>
+        </div>
+
+        <div id="checkinList" class="space-y-3">
+            @forelse($checkins as $ci)
+                <div class="p-3 rounded-2xl bg-purple-50/40 border border-purple-100 space-y-2" data-checkin-id="{{ $ci->id }}">
+                    <div class="flex items-center justify-between text-[11px] text-gray-500">
+                        <span class="font-bold text-siaga">
+                            <i class="fas fa-clock mr-1"></i>Pukul {{ $ci->checked_in_at->format('H:i') }} WIB
+                        </span>
+                        <span>{{ $ci->checked_in_at->diffForHumans() }}</span>
+                    </div>
+                    <a href="{{ asset('storage/' . $ci->foto_path) }}" target="_blank" class="block relative rounded-xl overflow-hidden border border-purple-100">
+                        <img src="{{ asset('storage/' . $ci->foto_path) }}" alt="Kondisi {{ $session->child->nama }}" class="w-full h-44 object-cover">
+                        <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-lg">
+                            <i class="fas fa-expand-alt mr-1"></i>Perbesar
+                        </span>
+                    </a>
+                    @if($ci->catatan)
+                        <p class="text-xs text-gray-700 bg-white p-2.5 rounded-xl border border-purple-50">
+                            {{ $ci->catatan }}
+                        </p>
+                    @endif
+                </div>
+            @empty
+                <div id="checkinEmpty" class="p-4 rounded-2xl bg-gray-50 border border-dashed border-gray-200 text-center text-xs text-gray-500">
+                    <i class="fas fa-images text-purple-300 text-lg mb-1 block"></i>
+                    Belum ada foto kondisi anak yang dikirim pengasuh pada sesi ini.
+                </div>
+            @endforelse
         </div>
     </div>
 
@@ -254,9 +364,9 @@
             @if($dev)
                 @php
                     $presets = [
-                        ['class' => 'ok',     'icon' => 'fa-heart',                'label' => 'Normal (85 BPM)',      'bpm' => 85,  'spo2' => 98, 'reed' => false],
-                        ['class' => 'danger', 'icon' => 'fa-exclamation-triangle', 'label' => 'BPM Tinggi (152 BPM)', 'bpm' => 152, 'spo2' => 97, 'reed' => false],
-                        ['class' => 'device', 'icon' => 'fa-magnet',               'label' => 'Gelang Terlepas',      'bpm' => 90,  'spo2' => 98, 'reed' => true],
+                        ['class' => 'ok',     'icon' => 'fa-heart',                'label' => 'Normal (85 BPM + GPS)',      'bpm' => 85,  'spo2' => 98, 'reed' => false, 'lat' => -6.77452, 'lng' => 110.84152, 'loc' => 'GondangManis, Kudus'],
+                        ['class' => 'danger', 'icon' => 'fa-exclamation-triangle', 'label' => 'BPM Tinggi (152 BPM)',       'bpm' => 152, 'spo2' => 97, 'reed' => false, 'lat' => -6.77510, 'lng' => 110.84210, 'loc' => 'Taman Kota Kudus'],
+                        ['class' => 'device', 'icon' => 'fa-magnet',               'label' => 'Gelang Terlepas',            'bpm' => 90,  'spo2' => 98, 'reed' => true,  'lat' => -6.77390, 'lng' => 110.84080, 'loc' => 'Area Rumah Anak'],
                     ];
                 @endphp
                 <div class="simulator__actions">
@@ -268,7 +378,10 @@
                                 data-device-token="{{ $dev->device_token }}"
                                 data-bpm="{{ $p['bpm'] }}"
                                 data-spo2="{{ $p['spo2'] }}"
-                                data-reed="{{ $p['reed'] ? 'true' : 'false' }}">
+                                data-reed="{{ $p['reed'] ? 'true' : 'false' }}"
+                                data-lat="{{ $p['lat'] }}"
+                                data-lng="{{ $p['lng'] }}"
+                                data-loc="{{ $p['loc'] }}">
                             <i class="fas {{ $p['icon'] }}"></i> {{ $p['label'] }}
                         </button>
                     @endforeach

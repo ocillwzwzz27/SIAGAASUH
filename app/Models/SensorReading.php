@@ -15,12 +15,17 @@ class SensorReading extends Model
         'bpm',
         'spo2',
         'reed_status',
+        'latitude',
+        'longitude',
+        'location_name',
         'recorded_at',
     ];
 
     protected $casts = [
         'recorded_at' => 'datetime',
         'reed_status' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function session()

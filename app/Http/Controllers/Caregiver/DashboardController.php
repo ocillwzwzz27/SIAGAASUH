@@ -20,7 +20,7 @@ class DashboardController extends Controller
 
         $sesi_aktif = CareSession::where('caregiver_id', $user->id)
             ->where('status', 'berjalan')
-            ->with('parent', 'child')
+            ->with(['parent', 'child', 'checkins', 'latestCheckin'])
             ->first();
 
         $total_sesi_selesai = CareSession::where('caregiver_id', $user->id)

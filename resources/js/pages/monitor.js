@@ -23,6 +23,16 @@ if (root) {
         alertBox: document.getElementById('alertBox'),
         alertDesc: document.getElementById('alertDesc'),
         alertClose: document.getElementById('alertClose'),
+        locationMapWrap: document.getElementById('locationMapWrap'),
+        locationEmptyBox: document.getElementById('locationEmptyBox'),
+        locationMapFrame: document.getElementById('locationMapFrame'),
+        locationCoords: document.getElementById('locationCoords'),
+        locationNameText: document.getElementById('locationNameText'),
+        locationStatusBadge: document.getElementById('locationStatusBadge'),
+        locationGmapsBtn: document.getElementById('locationGmapsBtn'),
+        checkinList: document.getElementById('checkinList'),
+        checkinEmpty: document.getElementById('checkinEmpty'),
+        checkinStatusBadge: document.getElementById('checkinStatusBadge'),
     };
 
     const hasValue = (v) => v !== undefined && v !== null;
@@ -59,6 +69,62 @@ if (root) {
 
         if (data.recorded_at) {
             el.updatedAt.textContent = `Terakhir update: ${data.recorded_at}`;
+        }
+
+        if (hasValue(data.latitude) && hasValue(data.longitude)) {
+            const lat = Number(data.latitude);
+            const lng = Number(data.longitude);
+            const embedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.004},${lat - 0.004},${lng + 0.004},${lat + 0.004}&layer=mapnik&marker=${lat},${lng}`;
+
+            if (el.locationMapFrame && el.locationMapFrame.dataset.coords !== `${lat},${lng}`) {
+                el.locationMapFrame.src = embedUrl;
+                el.locationMapFrame.dataset.coords = `${lat},${lng}`;
+            }
+            el.locationMapWrap?.classList.remove('hidden');
+            el.locationEmptyBox?.classList.add('hidden');
+            if (el.locationCoords) el.locationCoords.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            if (el.locationNameText) el.locationNameText.textContent = data.location_name || 'Titik lokasi perangkat aktif';
+            if (el.locationStatusBadge) {
+                el.locationStatusBadge.textContent = 'GPS Aktif';
+                el.locationStatusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700';
+            }
+            if (el.locationGmapsBtn) {
+                el.locationGmapsBtn.href = `https://www.google.com/maps?q=${lat},${lng}`;
+                el.locationGmapsBtn.classList.remove('pointer-events-none', 'opacity-50');
+            }
+        }
+
+        if (data.latest_checkin && el.checkinList) {
+            const ci = data.latest_checkin;
+            if (!el.checkinList.querySelector(`[data-checkin-id="${ci.id}"]`)) {
+                el.checkinEmpty?.remove();
+                const card = document.createElement('div');
+                card.className = 'p-3 rounded-2xl bg-purple-50/40 border border-purple-100 space-y-2';
+                card.dataset.checkinId = ci.id;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-[11px] text-gray-500">
+                        <span class="font-bold text-siaga"><i class="fas fa-clock mr-1"></i>Pukul ${ci.checked_in_at_time} WIB</span>
+                        <span>${ci.checked_in_at_human}</span>
+                    </div>
+                    <a href="${ci.foto_url}" target="_blank" class="block relative rounded-xl overflow-hidden border border-purple-100">
+                        <img src="${ci.foto_url}" alt="Kondisi Anak" class="w-full h-44 object-cover">
+                        <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-lg">
+                            <i class="fas fa-expand-alt mr-1"></i>Perbesar
+                        </span>
+                    </a>
+                `;
+                if (ci.catatan) {
+                    const note = document.createElement('p');
+                    note.className = 'text-xs text-gray-700 bg-white p-2.5 rounded-xl border border-purple-50';
+                    note.textContent = ci.catatan;
+                    card.appendChild(note);
+                }
+                el.checkinList.prepend(card);
+            }
+            if (el.checkinStatusBadge) {
+                el.checkinStatusBadge.textContent = `Terupdate ${ci.checked_in_at_human}`;
+                el.checkinStatusBadge.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700';
+            }
         }
 
         renderAlert(data);
@@ -104,6 +170,9 @@ if (root) {
                     bpm: Number(d.bpm),
                     spo2: Number(d.spo2),
                     reed_status: d.reed === 'true',
+                    latitude: d.lat ? Number(d.lat) : null,
+                    longitude: d.lng ? Number(d.lng) : null,
+                    location_name: d.loc || null,
                 }),
             })
                 .then((res) => res.json())

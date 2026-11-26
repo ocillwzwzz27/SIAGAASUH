@@ -116,7 +116,7 @@ class SessionController extends Controller
 
     public function monitor($id)
     {
-        $session = CareSession::with(['child.devices', 'caregiver.caregiverProfile', 'latestReading'])
+        $session = CareSession::with(['child.devices', 'caregiver.caregiverProfile', 'latestReading', 'checkins', 'latestCheckin'])
             ->where('parent_id', auth()->id())
             ->where('status', 'berjalan')
             ->findOrFail($id);
@@ -127,15 +127,29 @@ class SessionController extends Controller
     // API untuk polling data sensor real-time
     public function latestSensor($id)
     {
-        $session = CareSession::where('parent_id', auth()->id())->findOrFail($id);
+        $session = CareSession::with(['latestReading', 'latestCheckin'])
+            ->where('parent_id', auth()->id())
+            ->findOrFail($id);
         $reading = $session->latestReading;
+        $checkin = $session->latestCheckin;
 
         return response()->json([
             'bpm' => $reading?->bpm,
             'spo2' => $reading?->spo2,
             'reed_status' => $reading?->reed_status,
+            'latitude' => $reading?->latitude,
+            'longitude' => $reading?->longitude,
+            'location_name' => $reading?->location_name,
             'recorded_at' => $reading?->recorded_at?->diffForHumans(),
             'status_bpm' => $reading?->status_bpm,
+            'checkin_count' => $session->checkins()->count(),
+            'latest_checkin' => $checkin ? [
+                'id' => $checkin->id,
+                'foto_url' => asset('storage/' . $checkin->foto_path),
+                'catatan' => $checkin->catatan,
+                'checked_in_at_time' => $checkin->checked_in_at->format('H:i'),
+                'checked_in_at_human' => $checkin->checked_in_at->diffForHumans(),
+            ] : null,
         ]);
     }
 }

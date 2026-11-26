@@ -58,6 +58,16 @@ class CareSession extends Model
         return $this->hasOne(SensorReading::class, 'session_id')->latestOfMany();
     }
 
+    public function checkins()
+    {
+        return $this->hasMany(SessionCheckin::class, 'session_id')->orderByDesc('checked_in_at');
+    }
+
+    public function latestCheckin()
+    {
+        return $this->hasOne(SessionCheckin::class, 'session_id')->latestOfMany('checked_in_at');
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'berjalan';
